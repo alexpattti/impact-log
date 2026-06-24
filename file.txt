@@ -1,0 +1,14 @@
+cd "/Users/alexpatti/Desktop/Impel/Impact Log"
+
+
+
+https://alexpattti.github.io/impact-log/
+
+
+Edit data.json (in VS Code, like before, just this one file now instead of touching the HTML)
+Save
+In terminal:
+
+git add .
+git commit -m "update log"
+git push

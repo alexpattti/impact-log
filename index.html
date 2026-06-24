@@ -184,7 +184,17 @@
   .footer-link:hover { color: var(--accent); }
   @media (max-width: 600px) {
     #entries-list { grid-template-columns: 1fr; }
-    .totals-bar { flex-direction: column; align-items: center; }
+    .totals-bar {
+      gap: 0.4rem;
+    }
+    .total-card {
+      width: auto;
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 0.6rem 0.5rem;
+    }
+    .total-card .tl { font-size: 0.52rem; }
+    .total-card .tv { font-size: 1.15rem; }
     .header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     .footer { flex-direction: column; gap: 0.5rem; }
   }

@@ -1,0 +1,134 @@
+{
+  "projects": [
+    {
+      "id": "proj-001",
+      "name": "Specialty Account Type Reconciliation",
+      "status": "complete",
+      "date": "Apr–May 2026",
+      "records": 1241,
+      "volume": "~42,000-row SF export reviewed; 1,089 specialty accounts corrected; 152 net-new accounts identified and added",
+      "cause": "Account Type and Sub-Type fields blank or incorrect post-Salesforce migration. No validation enforced at record creation, so RV, Marine, Equipment, Power Sports, and Commercial accounts were lumped under wrong types or missing type entirely. Required manual keyword filtering, false-positive review, and brand-matching across five category tabs.",
+      "consequence": "Account type drives territory reporting, sales segmentation, OEM program filtering, and the customer cube. Every specialty account with a bad type corrupted any report or KPI built on top of it — including MRR by segment, OEM program eligibility, and any specialty-segment performance tracking."
+    },
+    {
+      "id": "proj-002",
+      "name": "Account Type = Dealership Bulk Update",
+      "status": "complete",
+      "date": "May–Jun 2026",
+      "records": 25726,
+      "volume": "25,726 Account records updated to Type=Dealership via Python/Selenium automation; 69 records required manual intervention due to validation errors; project complete",
+      "cause": "Account Type field missing or unset for the dealership segment post-migration. No automated enforcement at entry means records accumulated in an undefined state, blocking any type-based filtering or reporting on the core customer segment.",
+      "consequence": "Dealership accounts are the primary customer universe. Blank type data means segment-level reporting, renewal forecasting, and OEM filtering on the dealership base all return unreliable results. Cascades to the customer cube and revenue guidance model."
+    },
+    {
+      "id": "proj-003",
+      "name": "Contract Term & Renewal Term Backfill",
+      "status": "complete",
+      "date": "May 2026",
+      "records": 732,
+      "volume": "732 priority rows reviewed (active Sales AI assets with blank Contract Term and populated Lifecycle End Date); 300 filled with no conflicts, 15 conflicts flagged against Sage data, 415 deferred to Spence's Data Loader upload",
+      "cause": "Contract Term field blank for active assets — not carried over during Salesforce migration. Sage Intacct billing records contain the data but it was not mapped or backfilled, leaving a gap between what billing knows and what SF shows. Some records resolving via Sage report; others require manual PDF contract lookup.",
+      "consequence": "Contract Term feeds renewal forecasting, churn risk identification, and lifecycle management. Without it, Impel cannot accurately predict when contracts roll off or flag at-risk renewals — directly undermining the retention-focused GRR/NRR tracking Elizabeth and Andy prioritize."
+    },
+    {
+      "id": "proj-004",
+      "name": "Asset Rooftop Field Backfill",
+      "status": "complete",
+      "date": "May 2026",
+      "records": 51,
+      "volume": "51 asset records reviewed; Rooftop field populated on the majority; flagged group-level accounts, one auction, and one ambiguous entry for Elizabeth to handle separately",
+      "cause": "Rooftop field blank on a subset of assets post-migration. When assets lack a rooftop, Elizabeth's customer cube report cannot pull the account ID, breaking downstream field population for the entire record.",
+      "consequence": "Without a rooftop, assets surface in Elizabeth's reporting with missing account data, corrupting MRR segmentation and any account-level analysis built on top of the customer cube. Fix enables Elizabeth to rerun reporting and auto-populate the remaining blank fields via the rooftop waterfall."
+    },
+    {
+      "id": "proj-005",
+      "name": "Ourisman Rooftop Parent Account Alignment",
+      "status": "complete",
+      "date": "May 2026",
+      "records": 21,
+      "volume": "21 rooftops across 3 PODs (Pod 1: Robert Ourisman Jr., Pod 2: Christopher J. Ourisman, Pod 3: Danny Korengold); 3 accounts flagged as not found in SF (Lotus of Washington DC, Ourisman Tri-State Ford, Ourisman Tri-State Subaru); 1 structural discrepancy flagged (Ford Alexandria listed as one row on the sheet but exists as two separate SF accounts)",
+      "cause": "Parent Account field on rooftop-level accounts pointed directly to the top-level Ourisman Automotive Group instead of the correct POD-level intermediary account, or was left blank post-migration. The three-tier hierarchy (Rooftop > POD > Ourisman Automotive Group) was collapsed to two tiers for affected records.",
+      "consequence": "Without the correct POD-level parent, account hierarchy reporting breaks and any segmentation or rollup filtering built on the POD structure returns incorrect results. Ultimate Parent Account auto-populates correctly only once the POD intermediary is set, so dirty parent data cascades up through the entire Ourisman group hierarchy in SF."
+    },
+    {
+      "id": "proj-006",
+      "name": "Account Type Field Bulk Update (Rooftop + Parent)",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 6000,
+      "volume": "~5,965 blank rooftop accounts set to Type=Dealership; 37 Parent accounts manually reviewed and categorized as Dealership, Dealership Group, or flagged as outliers; 12 ambiguous non-dealership accounts (Vital Software, Kawasaki Australia, Green RV, etc.) isolated in a separate tab for Luke to resolve",
+      "cause": "Account Type field blank on ~6,000 rooftop and parent-level records not captured by the prior bulk script run -- primarily international accounts (Australia, UK, Canada, Mexico, Middle East) outside the original domestic scope, plus parent-level accounts requiring judgment calls on entity type.",
+      "consequence": "Blank Type fields on rooftop accounts break segment-level reporting, OEM filtering, and any revenue analysis built on account type. Parent accounts miscategorized as generic \"Parent\" rather than Dealership Group corrupt hierarchy rollups and territory reporting across all child accounts."
+    },
+    {
+      "id": "proj-007",
+      "name": "Billing Address Hygiene — Dealership Account Backfill",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 1222,
+      "volume": "2,281 filtered dealership accounts reviewed (from 5,235 total missing Billing Street); 378 verified addresses found at High or Medium confidence via Claude-assisted batch research; 844 additional accounts flagged across four categories: non-dealerships miscategorized as Dealership type (~208), international accounts with Billing Country incorrectly set to United States (~604 — Canadian, UK, Irish, Brazilian, Australian, and other foreign dealerships), test/placeholder records (39), and confirmed dead or closed accounts (21)",
+      "cause": "Billing Street field blank across 5,235 accounts post-migration. Majority owned by Data Migration user with no address data attached at import. Active rep-owned dealership accounts also affected, meaning billing records lacked physical location data for a significant portion of the active customer base. Underlying issues compounded by non-dealership entities and international accounts miscategorized as Dealership type with incorrect country fields.",
+      "consequence": "Missing billing addresses create gaps in invoice delivery accuracy and downstream billing system integrity. Wrong country fields on hundreds of international accounts (Canadian, Australian, Brazilian, Irish, and UK dealerships all marked as United States) risk misdirected billing and corrupt geographic segmentation in reporting. Non-dealerships and test records inflating the Dealership segment undermine any count-based reporting or quota modeling built on account type."
+    },
+    {
+      "id": "proj-008",
+      "name": "Billing State Backfill — Asset Account Records",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 88,
+      "volume": "103 US accounts with blank Billing State reviewed from Elizabeth's filtered asset report; 30 high-confidence records resolved in initial pass; second pass via Google Places API on 75 remaining rooftops returned 71 matches; 58 verified US states staged for Data Loader upload after removing 13 invalid/international results (Mexico, Canada, Brazil, Germany, Estonia, Italy, Saipan); file handed to Luke for import. Remaining accounts excluded: international entities with no applicable US state.",
+      "cause": "Billing State field blank on asset-linked account records. Missing address data at migration — accounts imported without geographic fields populated, leaving state blank across a subset of the active account base.",
+      "consequence": "Missing billing state breaks US territory assignment and geographic segmentation for affected accounts. Blank state on records tied to Elizabeth's customer cube causes those accounts to surface without location context, corrupting any region-based MRR or performance analysis."
+    },
+    {
+      "id": "proj-009",
+      "name": "Billing Address Backfill — Google Places API Automation",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 1775,
+      "volume": "4,434 accounts in SF missing Billing Street; 1,347 excluded pre-API (409 non-US, 938 non-Rooftop); 3,087 Rooftop US accounts processed across 3 API runs; 1,775 verified addresses confirmed and staged for SF import; 651 accounts flagged to Needs Review (large dealer groups or ambiguous multi-location matches); 661 accounts returned no usable result",
+      "cause": "Billing Street field blank across thousands of rooftop accounts post-migration. Data Migration user import carried no physical address data. Manual research (proj-007) addressed a subset; remaining volume required automation to be viable at scale.",
+      "consequence": "Missing billing addresses break invoice delivery accuracy and downstream billing system integrity. Automating the lookup via Google Places API with phone-number anchoring, website domain matching, and rooftop count signals recovered 1,775 addresses in a single session — establishing a repeatable method for future address hygiene passes. Also surfaced ~938 non-Rooftop accounts miscategorized as Rooftop in SF, inflating the rooftop count and flagged as a separate cleanup item for Luke."
+    },
+    {
+      "id": "proj-010",
+      "name": "Purchase Date Recovery Investigation — Legacy Asset Migration Gap",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 0,
+      "volume": "~10,000 asset records with blank Purchase Date reviewed (4,793 of which are Active, not Cancelled); traced individual records (Anthem Chevrolet, Carter Myers Automotive) through Subscription → Contract → Opportunity chain per Stephen Wood's documented method; attempted bulk Salesforce report cross-reference against full blank population to estimate recoverable volume",
+      "cause": "Pre-CPQ-migration assets retain only a Renewal Opportunity link post-migration — the original Opportunity does not survive the Outsell-to-CPQ transition, so no purchase date exists to recover for those records. Confirmed at the individual-record level via manual trace and at the bulk level: account and product naming conventions don't reconcile cleanly between legacy Outsell and current CPQ systems, making automated matching unreliable across the full population.",
+      "consequence": "Structural data gap from the 2024 CPQ migration affecting revenue/reporting completeness on a meaningful share of active assets — not a data-entry oversight, and not resolvable through standard bulk remediation. Findings documented and delivered to Luke for leadership; recommendation is to treat this as closed rather than pursue bulk recovery, given the cost-to-confidence ratio of manual tracing. One-off accounts can still be traced case by case if a contractual or legal need arises."
+    },
+    {
+      "id": "proj-011",
+      "name": "AIVA MRR / Net Unit Price Discrepancy — Pending Order Products Audit",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 23,
+      "volume": "209 pending AIVA order products reviewed (Onboarding Status = Pending) via custom Order Products report; none fell below the $1k threshold on Net Unit Price or MRR; 23 records identified with a consistent $200/month gap between Net Unit Price ($1,000) and MRR ($1,200)",
+      "cause": "Traced one flagged record (Tri-City Chrysler Dodge Jeep Ram) to its full Order Product detail. MRR calculated off List/Unit Price (gross, pre-discount), while Net Unit Price correctly reflected the post-discount amount. No 'Net MRR' field exists on the Order Product object, so any discounted AIVA deal showed this same gap by design, not as a data entry error.",
+      "consequence": "Any reporting or forecasting built on MRR was using gross revenue, not actual net recurring revenue, on discounted accounts. Confirmed with Luke; both Net Unit Price and MRR set to 1,000 to match the existing correct value across all 23 records, staged with Order Product IDs and handed off for Data Loader upload."
+    },
+    {
+      "id": "proj-012",
+      "name": "Service AI 1.0/2.0 Overlap Cleanup",
+      "status": "complete",
+      "date": "Jun 2026",
+      "records": 4,
+      "volume": "1,627 active Service AI 1.0/2.0 asset rows audited via Salesforce report; grouped by Account and Rooftop to isolate true overlaps from normal multi-rooftop accounts running different product versions; 4 rooftops identified with both products active simultaneously (Annapolis Nissan, Jim Hudson Toyota Sumter, Healey Brothers Cadillac, Riverside Nissan); new Lifecycle End Date calculated as one day prior to each account's Service AI 2.0 start date; staged with Asset IDs and handed to Luke for Data Loader upload after discovering Lifecycle End Date is a Data Loader-only field (no manual edit path; the field visible on the record page is a separate read-only formula field with the same label)",
+      "cause": "No automation existed to deactivate Service AI 1.0 assets upon Service AI 2.0 onboarding for legacy accounts, leaving both products active simultaneously. Riverside Nissan's overlap had gone undetected long enough that its corrected end date lands in the past, flagged separately to Luke for review before load.",
+      "consequence": "Overlapping active assets distort MRR and billing accuracy for the affected accounts and obscure true product adoption state. Fix also surfaced a page layout gap (the writable Lifecycle End Date field isn't exposed anywhere in the standard UI), worth flagging for a layout fix so this doesn't recur as a blocker on future cleanup work."
+    }
+  ],
+  "deliverables": [
+    {
+      "id": "del-001",
+      "name": "Legacy Outsell Purchase Date Recovery — Findings Memo",
+      "date": "June 2026",
+      "audience": "Luke, for leadership (Devin/Wayne/Andy if it comes up)",
+      "summary": "Purchase dates for ~10,000 legacy Outsell-migrated assets cannot be recovered at scale. The Renewal Opportunity link is the only thing that survives the migration on most records, and there is no remaining path back to the original purchase date. Manual tracing works per-account but costs ~25 clicks across 4 records for an estimate, not a confirmed date — not worth it across the full population.",
+      "context": "Built from Stephen Wood's walkthrough in the 6/23 Sales Ops standup, after Luke asked the team to document findings and prepare to present them up the chain rather than keep digging. Delivered as a one-page BLUF memo (Word doc) so leadership can skim the conclusion and stop, or read the supporting detail if they want it. In other words: I wrote a memo that the C suite will possibly see.... that's pretty cool."
+    }
+  ]
+}

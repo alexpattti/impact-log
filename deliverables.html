@@ -7,7 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #EDEAE3;
+    --bg-a: #EDEAE3;
+    --bg-b: #E9E7E0;
     --paper: #FBF9F5;
     --ink: #1C1A17;
     --ink-soft: #5A564E;
@@ -17,27 +18,29 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
  
+  html, body {
+    background: var(--bg-a);
+    background-image: repeating-linear-gradient(
+      0deg,
+      var(--bg-a) 0px, var(--bg-a) 3px,
+      var(--bg-b) 3px, var(--bg-b) 4px
+    );
+  }
+ 
   body {
-    background: var(--bg);
-    background-image:
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
     color: var(--ink);
     font-family: 'Newsreader', serif;
     font-weight: 400;
-    padding: 4rem 1.5rem 5rem;
+    padding: 3rem 1.5rem 5rem;
+    min-height: 100vh;
   }
  
-  .sheet {
-    max-width: 760px;
+  .page {
+    max-width: 1100px;
     margin: 0 auto;
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    box-shadow: 0 1px 0 var(--rule), 0 30px 60px -30px rgba(0,0,0,0.25);
-    padding: 3.5rem 3.5rem 0;
-    position: relative;
   }
  
-  /* Masthead */
+  /* ---------- Top header (page-level, sits above the grid) ---------- */
   .masthead {
     display: flex;
     justify-content: space-between;
@@ -47,7 +50,7 @@
     margin-bottom: 0.5rem;
   }
   .masthead h1 {
-    font-size: clamp(2rem, 6vw, 2.6rem);
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
     font-weight: 600;
     font-style: italic;
     letter-spacing: -0.01em;
@@ -75,7 +78,6 @@
     margin-bottom: 1.75rem;
   }
  
-  /* Tally line */
   .tally {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.68rem;
@@ -84,9 +86,7 @@
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
-    padding-bottom: 2.25rem;
     margin-bottom: 2.25rem;
-    border-bottom: 1px solid var(--rule);
   }
   .tally .num {
     font-family: 'Newsreader', serif;
@@ -96,25 +96,132 @@
     color: var(--accent);
   }
  
-  /* Entries */
-  #entries-list { display: flex; flex-direction: column; }
- 
-  .entry {
-    position: relative;
-    padding-bottom: 2.75rem;
-    margin-bottom: 2.75rem;
-    border-bottom: 1px solid var(--rule);
+  /* ---------- Grid of mini cards ---------- */
+  #entries-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    transition: filter 0.35s ease, opacity 0.35s ease;
   }
-  .entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0.5rem; }
+  #entries-grid.blurred {
+    filter: blur(6px) brightness(0.92);
+    opacity: 0.6;
+    pointer-events: none;
+  }
  
-  .entry-top {
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 0 3.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+ 
+  .mini-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 1.1rem 1.1rem 1.25rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    box-shadow: 0 1px 0 var(--rule);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    min-height: 150px;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    flex-direction: column;
   }
-  .entry-id {
+  .mini-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px -6px rgba(0,0,0,0.25);
+    transform: translateY(-2px);
+  }
+  .mini-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .mini-card.is-source {
+    visibility: hidden;
+  }
+  .mini-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin-bottom: 0.55rem;
+  }
+  .mini-name {
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ink);
+    flex-grow: 1;
+  }
+  .mini-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-top: 0.75rem;
+  }
+ 
+  /* ---------- Backdrop ---------- */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 26, 23, 0.28);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 50;
+  }
+  .backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+ 
+  /* ---------- Expanded (detail) card ---------- */
+  .detail-card {
+    position: fixed;
+    z-index: 60;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.35);
+    padding: 2.25rem 2.5rem 1.5rem;
+    overflow: hidden;
+    visibility: hidden;
+  }
+  .detail-card.animating,
+  .detail-card.open {
+    visibility: visible;
+  }
+ 
+  .detail-close {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.1rem;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .detail-close:hover { border-color: var(--accent); color: var(--accent); }
+ 
+  .detail-id {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.62rem;
     letter-spacing: 0.1em;
@@ -122,19 +229,28 @@
     text-transform: uppercase;
     margin-bottom: 0.5rem;
   }
-  .entry-name {
+  .detail-name {
     font-size: 1.5rem;
     font-weight: 500;
     line-height: 1.25;
     color: var(--ink);
+    padding-right: 2.5rem;
   }
-  .entry-date {
+  .detail-date {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.62rem;
     letter-spacing: 0.08em;
     color: var(--ink-soft);
     text-transform: uppercase;
     margin-top: 0.6rem;
+  }
+ 
+  .detail-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
   }
  
   .stamp {
@@ -162,7 +278,7 @@
   }
  
   .field { margin-bottom: 1.5rem; }
-  .field:last-child { margin-bottom: 0; }
+  .field:last-of-type { margin-bottom: 0; }
   .field-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.6rem;
@@ -183,42 +299,38 @@
     border-left: 3px solid var(--accent);
   }
  
-  .empty-state {
-    text-align: center;
-    padding: 3rem 0 3.5rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-  }
- 
-  /* Footer */
-  .footer {
+  .detail-footer {
     border-top: 3px solid var(--ink);
-    padding: 1.25rem 0 1.75rem;
+    padding: 1.1rem 0 0.25rem;
+    margin-top: 1.75rem;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.62rem;
     letter-spacing: 0.1em;
-    color: var(--ink-soft);
-    display: flex;
-    justify-content: space-between;
+    color: var(--ink);
+    font-weight: 500;
     text-transform: uppercase;
   }
-  .footer span:first-child { color: var(--ink); font-weight: 500; }
  
+  @media (max-width: 900px) {
+    #entries-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 600px) {
     body { padding: 2rem 0.75rem 3rem; }
-    .sheet { padding: 2rem 1.25rem 0; }
+    #entries-grid { grid-template-columns: 1fr; }
     .masthead { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
     .back-link { margin-left: 0; }
-    .entry-top { flex-direction: column; }
+    .detail-top { flex-direction: column; }
     .stamp { transform: none; max-width: none; text-align: left; }
+    .detail-card { padding: 1.75rem 1.5rem 1.25rem; }
+  }
+ 
+  @media (prefers-reduced-motion: reduce) {
+    #entries-grid, .backdrop, .detail-card { transition: none !important; }
   }
 </style>
 </head>
 <body>
-<div class="sheet">
+<div class="page">
   <div class="masthead">
     <h1>Misc Achievments</h1>
     <a class="back-link" href="index.html">Back to impact log</a>
@@ -230,18 +342,18 @@
     <span class="num" id="stat-count">0</span>
   </div>
  
-  <div id="entries-list">
+  <div id="entries-grid">
     <div class="empty-state">Loading…</div>
   </div>
- 
-  <div class="footer">
-    <span>ALEX PATTI // IMPEL AI</span>
-    <div class="footer-right">
-      <span id="footer-date"></span>
-    </div>
-  </div>
 </div>
+ 
+<div class="backdrop" id="backdrop"></div>
+ 
 <script>
+/* ---------------------------------------------------------------
+   Data note: "date" must be formatted as x/xx/xx, e.g. "6/23/26"
+   --------------------------------------------------------------- */
+ 
 function escHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -250,43 +362,195 @@ function escHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-function render(entries) {
-  const list = document.getElementById('entries-list');
-  list.innerHTML = '';
-  if (entries.length === 0) {
-    list.innerHTML = '<div class="empty-state">No deliverables logged yet</div>';
+ 
+let DATA = [];
+let activeCard = null;
+let isAnimating = false;
+ 
+function buildDetailHTML(e) {
+  return `
+    <button class="detail-close" aria-label="Close">&times;</button>
+    <div class="detail-top">
+      <div>
+        <div class="detail-id">${escHtml(e.id || '')}</div>
+        <div class="detail-name">${escHtml(e.name)}</div>
+        <div class="detail-date">${escHtml(e.date || '')}</div>
+      </div>
+      <div class="stamp">${escHtml(e.audience || '')}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Bottom line</div>
+      <div class="field-val highlight">${escHtml(e.summary)}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Context</div>
+      <div class="field-val">${escHtml(e.context)}</div>
+    </div>
+    <div class="detail-footer">ALEX PATTI // IMPEL AI</div>
+  `;
+}
+ 
+function getTargetRect(detail) {
+  // Centered, sized to content, capped so it never exceeds the viewport.
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const width = Math.min(720, vw - 48);
+  const maxHeight = vh - 64;
+ 
+  // Measure natural content height at this width without showing it yet.
+  const prevWidth = detail.style.width;
+  const prevVisibility = detail.style.visibility;
+  const prevPosition = detail.style.position;
+  detail.style.visibility = 'hidden';
+  detail.style.position = 'fixed';
+  detail.style.width = width + 'px';
+  detail.style.height = 'auto';
+  const naturalHeight = detail.scrollHeight;
+  detail.style.width = prevWidth;
+  detail.style.visibility = prevVisibility;
+  detail.style.position = prevPosition;
+ 
+  const height = Math.min(naturalHeight, maxHeight);
+  const left = (vw - width) / 2;
+  const top = Math.max(24, (vh - height) / 2);
+  return { left, top, width, height };
+}
+ 
+function openCard(miniEl, entry) {
+  if (isAnimating) return;
+  isAnimating = true;
+ 
+  const startRect = miniEl.getBoundingClientRect();
+  miniEl.classList.add('is-source');
+ 
+  const grid = document.getElementById('entries-grid');
+  grid.classList.add('blurred');
+ 
+  const backdrop = document.getElementById('backdrop');
+  backdrop.classList.add('visible');
+ 
+  const detail = document.createElement('div');
+  detail.className = 'detail-card animating';
+  detail.innerHTML = buildDetailHTML(entry);
+  document.body.appendChild(detail);
+  activeCard = { el: detail, sourceEl: miniEl };
+ 
+  // Start at the mini card's exact position/size.
+  detail.style.left = startRect.left + 'px';
+  detail.style.top = startRect.top + 'px';
+  detail.style.width = startRect.width + 'px';
+  detail.style.height = startRect.height + 'px';
+  detail.style.borderRadius = '0px';
+  detail.style.transition = 'none';
+ 
+  // Hide inner content until the card is large enough to need it (avoid flash).
+  detail.style.overflow = 'hidden';
+ 
+  const target = getTargetRect(detail);
+ 
+  requestAnimationFrame(() => {
+    detail.style.transition = 'left 0.32s cubic-bezier(.2,.8,.2,1), top 0.32s cubic-bezier(.2,.8,.2,1), width 0.32s cubic-bezier(.2,.8,.2,1), height 0.32s cubic-bezier(.2,.8,.2,1)';
+    detail.style.left = target.left + 'px';
+    detail.style.top = target.top + 'px';
+    detail.style.width = target.width + 'px';
+    detail.style.height = target.height + 'px';
+  });
+ 
+  const onEnd = (evt) => {
+    if (evt.propertyName !== 'width') return;
+    detail.removeEventListener('transitionend', onEnd);
+    // Only allow scrolling if content genuinely exceeds the final height
+    // (small tolerance to absorb subpixel rounding from the FLIP animation).
+    detail.style.overflow = (detail.scrollHeight - detail.clientHeight) > 2 ? 'auto' : 'hidden';
+    detail.classList.remove('animating');
+    detail.classList.add('open');
+    isAnimating = false;
+    detail.querySelector('.detail-close').focus();
+  };
+  detail.addEventListener('transitionend', onEnd);
+ 
+  detail.querySelector('.detail-close').addEventListener('click', closeActiveCard);
+  document.body.style.overflow = 'hidden';
+}
+ 
+function closeActiveCard() {
+  if (!activeCard || isAnimating) return;
+  isAnimating = true;
+ 
+  const { el: detail, sourceEl } = activeCard;
+  const backdrop = document.getElementById('backdrop');
+  const grid = document.getElementById('entries-grid');
+ 
+  detail.classList.remove('open');
+  detail.classList.add('animating');
+  detail.style.overflow = 'hidden';
+ 
+  const startRect = sourceEl.getBoundingClientRect();
+ 
+  requestAnimationFrame(() => {
+    detail.style.left = startRect.left + 'px';
+    detail.style.top = startRect.top + 'px';
+    detail.style.width = startRect.width + 'px';
+    detail.style.height = startRect.height + 'px';
+  });
+ 
+  backdrop.classList.remove('visible');
+  grid.classList.remove('blurred');
+ 
+  const onEnd = (evt) => {
+    if (evt.propertyName !== 'width') return;
+    detail.removeEventListener('transitionend', onEnd);
+    detail.remove();
+    sourceEl.classList.remove('is-source');
+    activeCard = null;
+    isAnimating = false;
+    document.body.style.overflow = '';
+  };
+  detail.addEventListener('transitionend', onEnd);
+}
+ 
+document.getElementById('backdrop').addEventListener('click', closeActiveCard);
+document.addEventListener('keydown', (evt) => {
+  if (evt.key === 'Escape') closeActiveCard();
+});
+window.addEventListener('resize', () => {
+  if (activeCard && activeCard.el.classList.contains('open')) {
+    const target = getTargetRect(activeCard.el);
+    activeCard.el.style.left = target.left + 'px';
+    activeCard.el.style.top = target.top + 'px';
+    activeCard.el.style.width = target.width + 'px';
+    activeCard.el.style.height = target.height + 'px';
+    activeCard.el.style.overflow = (activeCard.el.scrollHeight - target.height) > 2 ? 'auto' : 'hidden';
   }
-  entries.forEach(e => {
-    const div = document.createElement('div');
-    div.className = 'entry';
-    div.innerHTML = `
-      <div class="entry-top">
-        <div>
-          <div class="entry-id">${escHtml(e.id || '')}</div>
-          <div class="entry-name">${escHtml(e.name)}</div>
-          <div class="entry-date">${escHtml(e.date || '')}</div>
-        </div>
-        <div class="stamp">${escHtml(e.audience || '')}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Bottom line</div>
-        <div class="field-val highlight">${escHtml(e.summary)}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Context</div>
-        <div class="field-val">${escHtml(e.context)}</div>
-      </div>
+});
+ 
+function render(entries) {
+  DATA = entries;
+  const grid = document.getElementById('entries-grid');
+  grid.innerHTML = '';
+  if (entries.length === 0) {
+    grid.innerHTML = '<div class="empty-state">No deliverables logged yet</div>';
+  }
+  entries.forEach((e, idx) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'mini-card';
+    card.innerHTML = `
+      <div class="mini-id">${escHtml(e.id || '')}</div>
+      <div class="mini-name">${escHtml(e.name)}</div>
+      <div class="mini-date">${escHtml(e.date || '')}</div>
     `;
-    list.appendChild(div);
+    card.addEventListener('click', () => openCard(card, e));
+    grid.appendChild(card);
   });
   document.getElementById('stat-count').textContent = entries.length;
-  document.getElementById('footer-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
 }
+ 
 fetch('data.json')
   .then(res => res.json())
   .then(data => render(data.deliverables || []))
   .catch(err => {
-    document.getElementById('entries-list').innerHTML = '<div class="empty-state">Could not load data.json</div>';
+    document.getElementById('entries-grid').innerHTML = '<div class="empty-state">Could not load data.json</div>';
     console.error(err);
   });
 </script>

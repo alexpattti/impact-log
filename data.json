@@ -95,7 +95,7 @@
       "name": "Purchase Date Recovery Investigation — Legacy Asset Migration Gap",
       "status": "complete",
       "date": "6/23/26",
-      "records": 0,
+      "records": null,
       "volume": "~10,000 asset records with blank Purchase Date reviewed (4,793 of which are Active, not Cancelled); traced individual records (Anthem Chevrolet, Carter Myers Automotive) through Subscription → Contract → Opportunity chain per Stephen Wood's documented method; attempted bulk Salesforce report cross-reference against full blank population to estimate recoverable volume",
       "cause": "Pre-CPQ-migration assets retain only a Renewal Opportunity link post-migration — the original Opportunity does not survive the Outsell-to-CPQ transition, so no purchase date exists to recover for those records. Confirmed at the individual-record level via manual trace and at the bulk level: account and product naming conventions don't reconcile cleanly between legacy Outsell and current CPQ systems, making automated matching unreliable across the full population.",
       "consequence": "Structural data gap from the 2024 CPQ migration affecting revenue/reporting completeness on a meaningful share of active assets — not a data-entry oversight, and not resolvable through standard bulk remediation. Findings documented and delivered to Luke for leadership; recommendation is to treat this as closed rather than pursue bulk recovery, given the cost-to-confidence ratio of manual tracing. One-off accounts can still be traced case by case if a contractual or legal need arises."
@@ -119,6 +119,36 @@
       "volume": "1,627 active Service AI 1.0/2.0 asset rows audited via Salesforce report; grouped by Account and Rooftop to isolate true overlaps from normal multi-rooftop accounts running different product versions; 4 rooftops identified with both products active simultaneously (Annapolis Nissan, Jim Hudson Toyota Sumter, Healey Brothers Cadillac, Riverside Nissan); new Lifecycle End Date calculated as one day prior to each account's Service AI 2.0 start date; staged with Asset IDs and handed to Luke for Data Loader upload after discovering Lifecycle End Date is a Data Loader-only field (no manual edit path; the field visible on the record page is a separate read-only formula field with the same label)",
       "cause": "No automation existed to deactivate Service AI 1.0 assets upon Service AI 2.0 onboarding for legacy accounts, leaving both products active simultaneously. Riverside Nissan's overlap had gone undetected long enough that its corrected end date lands in the past, flagged separately to Luke for review before load.",
       "consequence": "Overlapping active assets distort MRR and billing accuracy for the affected accounts and obscure true product adoption state. Fix also surfaced a page layout gap (the writable Lifecycle End Date field isn't exposed anywhere in the standard UI), worth flagging for a layout fix so this doesn't recur as a blocker on future cleanup work."
+    },
+    {
+    "id": "proj-013",
+    "name": "AIVA Order Product Net Unit Price Restatement",
+    "status": "complete",
+    "date": "6/30/26",
+    "records": 205,
+    "volume": "205 AIVA backlog Order Product records restated from Net Unit Price $1,200 to $1,000 per renegotiated rate; filtered report built with Luke on Order Products, exported to CSV, updated via Data Loader.io mapped on Order Product ID",
+    "cause": "Austin Beckner negotiated a new AIVA rate ($1,200 to $1,000) but the backlog of existing Order Product records still reflected the old rate. Luke walked through the correct field to update in person: Net Unit Price only, not the Quote Line Item MRR or Gross Activation MRR fields initially flagged, since those roll up from Net Unit Price and the converted currency field is a runtime formula that can't be mapped in Data Loader.",
+    "consequence": "Unrestated records would continue billing/reporting at the old rate despite the renegotiated terms, understating the rate change across the full AIVA backlog. Correction via Data Loader on Order Product ID keeps MRR (converted) and Net Unit Price aligned at the new rate going forward."
+    },
+    {
+    "id": "proj-014",
+    "name": "Active Assets on Inactive Accounts",
+    "status": "complete",
+    "date": "7/10/26",
+    "records": 2320,
+    "volume": "2,320 active assets flagged on rooftop accounts not showing Active status, via Accounts with Assets - Custom report built with Luke at the rooftop level (not OEM level). Broken down as 2,152 Prospect, 100 Implementation, 68 Cancelled.",
+    "cause": "Asset Status and Account Status are not automatically kept in sync, active assets can persist on accounts that have moved to Prospect, Implementation, or Cancelled at the rooftop level with no automated flag or reconciliation step.",
+    "consequence": "Active assets tied to Cancelled accounts represent live billing/service exposure on terminated relationships. All 68 Cancelled-account assets were resolved directly. Report set to weekly Friday delivery to catch new instances going forward."
+    },
+    {
+    "id": "proj-015",
+    "name": "Bundle Mixed-Completion States",
+    "status": "complete",
+    "date": "7/13/26",
+    "records": null,
+    "volume": "Identified bundles where some component Order Products show Onboarding Status = Complete while others remain Pending, built via Excel-based conflict detection pipeline (COUNTIFS per unique Order Number) with color-coded output by rooftop.",
+    "cause": "Assets and billing for a bundle only trigger once every component Order Product in the bundle reaches Complete status; partial completion silently blocks the bundle from ever generating an asset with no visible flag in Salesforce report builder, which can't natively isolate mixed-status groups.",
+    "consequence": "Bundles stuck in partial completion delay both asset creation and billing indefinitely with no native alert. Pipeline delivered to Andy Bohlin to identify and unblock affected bundles."
     }
   ],
   "deliverables": [

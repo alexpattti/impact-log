@@ -149,6 +149,56 @@
     "volume": "Identified bundles where some component Order Products show Onboarding Status = Complete while others remain Pending, built via Excel-based conflict detection pipeline (COUNTIFS per unique Order Number) with color-coded output by rooftop.",
     "cause": "Assets and billing for a bundle only trigger once every component Order Product in the bundle reaches Complete status; partial completion silently blocks the bundle from ever generating an asset with no visible flag in Salesforce report builder, which can't natively isolate mixed-status groups.",
     "consequence": "Bundles stuck in partial completion delay both asset creation and billing indefinitely with no native alert. Pipeline delivered to Andy Bohlin to identify and unblock affected bundles."
+    },
+    {
+    "id": "proj-016",
+    "name": "Account Relationship Deduplication — Phase 1 & 2",
+    "status": "complete",
+    "date": "7/13/26",
+    "records": 8038,
+    "volume": "Phase 1: 67,079-row Account Relationship export reviewed with Katherine Brady; 6,838 records kept, 1,300 flagged for deletion, 9 flagged for review. Phase 2: active/implementation rooftop accounts with Sync to IDP = False reviewed against Luke's retention rules; 723 rows flagged for brand corrections plus 26 OEM mismatch records isolated for Luke's review. Both phases handed off.",
+    "cause": "Duplicate Account Relationship records and misaligned Related Brand/OEM fields accumulated with no dedup or validation pass since migration, driven by inconsistent MSA Pricing values, blank OEM fields resolved only by sibling-record inference, and no enforced rule preventing duplicate Account+OEM pairs from being created.",
+    "consequence": "Duplicate and misaligned relationship records inflate rooftop counts, distort OEM-level segmentation, and corrupt any account hierarchy or brand-based reporting built on Account Relationship data. Clean-up restores accuracy to relationship-based rollups; 26 OEM mismatches and Data Loader execution still pending Luke's confirmation."
+    },
+    {
+      "id": "proj-017",
+      "name": "Toma Competitor Outreach List",
+      "status": "complete",
+      "date": "7/15/26",
+      "records": 274,
+      "volume": "274 former Toma competitor rooftops reviewed with Katherine Brady; Salesforce data (Account ID, Status, Active/Inactive Assets, Pending Order Products, MRR) populated across columns L-Q in shared Google Sheet; Active Assets Names column added for upsell context; follow-up pass matched 3 additional pending/implementation accounts (Ferrari of Long Island, Fayetteville Dodge Ram, Rhythm CDJR). Delivered to Danny Rastegar for outreach.",
+      "cause": "No existing view combined competitor-displaced accounts with current Salesforce status, active product footprint, and pending orders, so sales had no way to prioritize or contextualize outreach to former Toma clients without manual account-by-account lookup.",
+      "consequence": "Sales now has a single reference sheet showing account status, live assets, and pending orders across all 274 rooftops, enabling targeted upsell/cross-sell outreach instead of blind competitor conquest contact."
+    },
+    {
+      "id": "proj-018",
+      "name": "Order Product Asset Creation Gap",
+      "status": "complete",
+      "date": "7/13/26",
+      "records": 1399,
+      "volume": "3,328-row Order Product export reviewed (Onboarding Status = Complete, bundle children excluded); filtered out $0 total price and 1-month trial/promotional records; 1,399 records across 790 unique accounts confirmed as Complete with no corresponding asset created. Manual sampling of 10 records identified two failure sub-patterns. Documented in Obsidian and flagged to Salman for debugging.",
+      "cause": "Asset creation automation does not reliably trigger on Onboarding Status transitioning to Complete. Sampling showed both clean records with well-documented Pending-to-Complete transitions and no asset (trigger failure), and records with no logged status-change event or mismatched Onboarding Process fields (possible integrity or bypass issue).",
+      "consequence": "790 accounts have completed onboarding with no corresponding asset, meaning no billing, no MRR attribution, and no product-adoption visibility for real, live implementations. Treated as a broken automation trigger rather than a leadership decision, so it sits outside the Pre-Decision Impact Mapping thesis as a sibling structural finding; Salman is debugging the root cause."
+    },
+    {
+      "id": "proj-019",
+      "name": "Gumloop Canceled-Account Alert Agent",
+      "status": "complete",
+      "date": "7/16/26",
+      "records": 66,
+      "volume": "Built and validated with Benjy via SOQL workaround (Salesforce report UI editing blocked by org security policy). Filters: Account Status = Permanently Closed or Cancelled, Onboarding Status = Complete as active proxy, Order Product End Date excluded only if in the past. Returned 11 unique accounts and 66 active order products, matching prior week's manual count.",
+      "cause": "No automated alert existed to flag active, billable order products still sitting on canceled or permanently closed accounts, leaving this exposure discoverable only through ad hoc manual pulls.",
+      "consequence": "Validated build gives Sales Ops a repeatable, scheduled check for live billing/service exposure on terminated accounts. Also surfaced a secondary data gap: all 11 accounts returned as Cancelled with zero Permanently Closed matches, flagged to Benjy. Presented at the 7/21 scoping session to define the next 1-2 Gumloop automation targets."
+    },
+    {
+      "id": "proj-020",
+      "name": "Sales Segment Override Audit",
+      "status": "complete",
+      "date": "7/16/26",
+      "records": 20,
+      "volume": "Gumloop SOQL pull on Sales_Segment_Override__c = true returned 20 accounts; 19 belong to two dealer groups (Gerald Jones: 8, Steet Ponte: 10), plus CDK Global as a standalone. Finding shared with Luke to confirm whether segment classifications are still accurate.",
+      "cause": "The override flag unlocks manual editing of the Sales Segment field rather than flagging an anomaly, so accounts can retain a manually-set segment indefinitely without revalidation against current account state.",
+      "consequence": "Concentration in two dealer groups raises the question of whether their segment classification still reflects reality or is stale from a past manual override. Awaiting Luke's read on whether this becomes a formal reclassification pass."
     }
   ],
   "deliverables": [

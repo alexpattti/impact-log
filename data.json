@@ -199,6 +199,86 @@
       "volume": "Gumloop SOQL pull on Sales_Segment_Override__c = true returned 20 accounts; 19 belong to two dealer groups (Gerald Jones: 8, Steet Ponte: 10), plus CDK Global as a standalone. Finding shared with Luke to confirm whether segment classifications are still accurate.",
       "cause": "The override flag unlocks manual editing of the Sales Segment field rather than flagging an anomaly, so accounts can retain a manually-set segment indefinitely without revalidation against current account state.",
       "consequence": "Concentration in two dealer groups raises the question of whether their segment classification still reflects reality or is stale from a past manual override. Awaiting Luke's read on whether this becomes a formal reclassification pass."
+    },
+    {
+      "id": "proj-021",
+      "name": "Implementation Accounts With No Order Products",
+      "status": "complete",
+      "date": "7/20/26",
+      "records": 1046,
+      "volume": "Luke requested a list of Account Status = Implementation accounts (Record Type = Rooftop and Non-Dealership) carrying zero Order Products. Built subtractively: List A of 1,046 Implementation accounts anti-joined against List B of 51,267 unique account IDs with at least one Order Product. Result was zero gap accounts; every account in scope already had Order Product coverage. Finding reported back to Luke verbally.",
+      "cause": "The 'Accounts With Order Products - CUSTOM' report type is an inner join, so it structurally cannot surface accounts with zero related Order Products. Third confirmed instance of an inner-join report type blocking a 'show me what's missing' query, alongside the Order Product to Asset join gap.",
+      "consequence": "Negative finding: no data integrity issue exists in this population, which closes the question rather than opening a cleanup. The real takeaway is structural, not data-level. Answering absence questions currently requires two exports and a manual anti-join every time, which is a repeatable cost until a custom report type or cross filter approach is standardized."
+    },
+    {
+      "id": "proj-022",
+      "name": "Active Assets Missing Active Date",
+      "status": "complete",
+      "date": "7/21/26",
+      "records": 117,
+      "volume": "Ad hoc request from Luke for active assets carrying a Lifecycle Start Date but no Active Date. Reopened the 7/16 report (118 records at the time), found it filtered only on Status = Active and Active Date = blank without enforcing Lifecycle Start Date populated. Added the missing filter, trimmed columns to Asset Name, Account Name, Status, Lifecycle Start Date, Active Date. Final count 117.",
+      "cause": "Active Date is not enforced as a required field when an asset transitions to Active status, so assets can go live with a lifecycle start recorded but no active date, leaving the two lifecycle fields out of sync.",
+      "consequence": "Any tenure, time-to-activation, or lifecycle-duration calculation built on Active Date silently drops or misdates these 117 assets. Verifying the prior report's filters rather than resending the old number caught a genuine scope mismatch against what Luke actually asked for."
+    },
+    {
+      "id": "proj-023",
+      "name": "Bundle Mixed-Completion States — July Rerun",
+      "status": "complete",
+      "date": "7/22/26",
+      "records": 53,
+      "volume": "Andy Bohlin requested a rerun of the 7/13 conflict report. No saved source export existed, so the Salesforce report was rebuilt from scratch on 'Order Products - Custom' and the conflict detection pipeline rerun. Result: 16 conflicting orders across 53 rows, 25 line items still Pending. Added a derived Brand column (Ford, GM, Honda, Kia, Lithia) at Andy's request, then a second pass adding MRR and NUP, quantifying $24,096.54 pending MRR and $26,274.50 pending NUP.",
+      "cause": "Same root cause as proj-015: bundles only generate assets and billing once every component Order Product reaches Complete, and Salesforce cannot natively isolate mixed-status groups. The rerun exposed a second-order problem, that no source export or saved report from the original run was retained, forcing a full rebuild.",
+      "consequence": "Roughly $24k in monthly recurring revenue is sitting unbilled behind partially-completed bundles with no native alert. Quantifying the dollar exposure rather than just the record count changed how the finding lands with a stakeholder. Standing lesson: save the Salesforce report object, not just the export, or every rerun is a rebuild."
+    },
+    {
+      "id": "proj-024",
+      "name": "360 WalkArounds Feature Gap Reports",
+      "status": "complete",
+      "date": "7/22/26",
+      "records": 259,
+      "volume": "Three gap reports requested by Austin Beckner and Kyle Greer via Art: Lithia dealers with 360 WalkArounds but no Feature Tour Merchandising (94 accounts), Lithia with 360 but no AI Virtual Booth (165 accounts), and all SMB dealers (Acquisition + Expansion) with 360 but no Feature Tour. First pass delivered as CSVs built through a pandas pivot/flag approach; Kyle then asked for native Salesforce reports, prompting a full rebuild using Cross Filters (Accounts WITH Assets / Accounts WITHOUT Assets). All three saved and links shared in a Slack group with Austin, Kyle, and Luke.",
+      "cause": "Salesforce cannot perform 'has asset A but not asset B' logic in a standard single-pass report; Cross Filters are the correct native mechanism and were not being used. Field discovery also surfaced that Lithia is not a Sales Segment value at all, it is a parent-child account structure, so the correct filter is Parent Account Name contains Lithia. Two Feature Tour asset name variants exist in the data, which a naive exact match would have missed.",
+      "consequence": "Cross-sell targets for the 360 install base are now standing, self-refreshing Salesforce reports rather than one-time CSVs that go stale the day they are sent. A near-miss was caught in review: report 3 had been duplicated from the Virtual Booth version and still carried the wrong cross filter."
+    },
+    {
+      "id": "proj-025",
+      "name": "Assets Without Rooftop Assignment",
+      "status": "complete",
+      "date": "7/23/26",
+      "records": 22,
+      "volume": "Luke relayed a request from Johnathan Spence testing the hypothesis that some Order Products without assets had slipped through without a rooftop assignment. Built 'Assets Without Rooftop - Custom' on the Accounts with Assets report type with a null filter on Rooftop, trimmed to relevant columns. Returned 22 records. Report link and count sent back to Luke; Spence confirmed the result matched expectations.",
+      "cause": "Rooftop is not enforced on asset creation, but the 22 records are almost entirely legacy Cancelled or Inactive assets with zero Active records, meaning this is residue from historical data rather than an active automation failure.",
+      "consequence": "Hypothesis disproven. Explicitly ruled out as supporting evidence for the Salman asset creation gap escalation, which matters because attaching an unrelated 22-record population to a 1,399-record automation failure would have weakened the escalation rather than strengthened it."
+    },
+    {
+      "id": "proj-026",
+      "name": "MRR Production by Rep and Month Matrix",
+      "status": "complete",
+      "date": "7/23/26",
+      "records": null,
+      "volume": "Art requested a matrix report of MRR production by rep and month, US billing only, current fiscal year. First build on 'Order Products - Custom' grouped by Account Owner failed the requirement because no Team field exists on Order Products or on 'Accounts With Order Products - CUSTOM'. Rebuilt from Austin Beckner's existing YTD Bookings by Rep Sales Scorecard on 'Opportunities with Quotes and Quote Lines', which already carries Sales Team logic, with Sales Team as the outer row group, Opportunity Owner nested, and Close Date by calendar month as columns.",
+      "cause": "Sales team structure is not modeled on the Order Product or Account objects, so team-level revenue reporting is only possible on the Opportunity side. Luke confirmed a role hierarchy build in Sandbox is the real long-term fix.",
+      "consequence": "Team-level production reporting works today only by inheriting logic from one pre-existing scorecard report, which is a single point of failure. Checking whether an existing report already solves the join is faster than building the schema from scratch."
+    },
+    {
+      "id": "proj-027",
+      "name": "SET Toyota Dealer Product Coverage Matrix",
+      "status": "complete",
+      "date": "7/23/26",
+      "records": 43,
+      "volume": "Austin requested active-asset coverage by product category for Art across 43 SET Toyota dealers in SET_Service_AI_Dealers.xlsx. Pulled a Salesforce export on Accounts with Assets (Account Name, Asset Name, Product Family, Status), re-pulled after finding Digital Asset Status entirely blank and the correct field being asset-level Status. Delivered 8 binary coverage columns: Chat AI, Sales AI, Service AI, AI Marketing, Ad Tech, Merchandising Hardware, Merchandising Software, Setup.",
+      "cause": "Dealer names in the source file did not match Salesforce account names because of typos, dropped suffixes, and abbreviations, requiring fuzzy matching plus one manual Salesforce lookup to resolve Village Toyota to Village Toyota Homosassa. AI Communications is also a single Product Family covering distinct sellable products, so sub-categorization had to be done by asset name keyword rather than by the schema.",
+      "consequence": "Head of sales now has a whitespace view of product coverage across the SET Toyota book. The deeper issue is that Product Family does not map cleanly to how the products are actually sold, so any product-level analysis requires manual bucketing by asset name."
+    },
+    {
+      "id": "proj-028",
+      "name": "Internal vs Cancelled Churn Reclassification Backfill",
+      "status": "complete",
+      "date": "7/24/26",
+      "records": 1061,
+      "volume": "Board-level data correction with Andy Bohlin and Cecilia: identify churn records coded Internal that should have been Cancelled, and backfill a 'When should it have been cancelled?' date column. 1,061 rows deduplicated to 239 distinct Cancellation Reason Details strings, dates inferred and filled for 142 cases, 38 ambiguous cases returned grouped by failure type (vague relative time, year or quarter only, disputed dates, conflicting dates, implied but unstated). Phase 1 delivered to the Andy/Cecilia/Luke group.",
+      "cause": "Cancel dates were never captured as structured data. The only record of when an account should have been cancelled lives in free-text retention case notes, so recovering the date requires parsing prose rather than querying a field. Cecilia also writes 'should have fallen off' language in the Notes field, not only in Description, so the first pass missed a source column entirely until Andy added a vlookup at column AJ.",
+      "consequence": "Miscoded Internal churn understates true cancellation volume in board reporting. 142 of 239 distinct cases recovered on the first pass; second pass pending against the newly populated Notes column plus whatever Cecilia resolves manually. Structural point: this is a field-capture failure, not a data entry failure, and it will recur until a cancel date is required at case close."
     }
   ],
   "deliverables": [

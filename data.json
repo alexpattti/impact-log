@@ -121,44 +121,44 @@
       "consequence": "Overlapping active assets distort MRR and billing accuracy for the affected accounts and obscure true product adoption state. Fix also surfaced a page layout gap (the writable Lifecycle End Date field isn't exposed anywhere in the standard UI), worth flagging for a layout fix so this doesn't recur as a blocker on future cleanup work."
     },
     {
-    "id": "proj-013",
-    "name": "AIVA Order Product Net Unit Price Restatement",
-    "status": "complete",
-    "date": "6/30/26",
-    "records": 205,
-    "volume": "205 AIVA backlog Order Product records restated from Net Unit Price $1,200 to $1,000 per renegotiated rate; filtered report built with Luke on Order Products, exported to CSV, updated via Data Loader.io mapped on Order Product ID",
-    "cause": "Austin Beckner negotiated a new AIVA rate ($1,200 to $1,000) but the backlog of existing Order Product records still reflected the old rate. Luke walked through the correct field to update in person: Net Unit Price only, not the Quote Line Item MRR or Gross Activation MRR fields initially flagged, since those roll up from Net Unit Price and the converted currency field is a runtime formula that can't be mapped in Data Loader.",
-    "consequence": "Unrestated records would continue billing/reporting at the old rate despite the renegotiated terms, understating the rate change across the full AIVA backlog. Correction via Data Loader on Order Product ID keeps MRR (converted) and Net Unit Price aligned at the new rate going forward."
+      "id": "proj-013",
+      "name": "AIVA Order Product Net Unit Price Restatement",
+      "status": "complete",
+      "date": "6/30/26",
+      "records": 205,
+      "volume": "205 AIVA backlog Order Product records restated from Net Unit Price $1,200 to $1,000 per renegotiated rate; filtered report built with Luke on Order Products, exported to CSV, updated via Data Loader.io mapped on Order Product ID",
+      "cause": "Austin Beckner negotiated a new AIVA rate ($1,200 to $1,000) but the backlog of existing Order Product records still reflected the old rate. Luke walked through the correct field to update in person: Net Unit Price only, not the Quote Line Item MRR or Gross Activation MRR fields initially flagged, since those roll up from Net Unit Price and the converted currency field is a runtime formula that can't be mapped in Data Loader.",
+      "consequence": "Unrestated records would continue billing/reporting at the old rate despite the renegotiated terms, understating the rate change across the full AIVA backlog. Correction via Data Loader on Order Product ID keeps MRR (converted) and Net Unit Price aligned at the new rate going forward."
     },
     {
-    "id": "proj-014",
-    "name": "Active Assets on Inactive Accounts",
-    "status": "complete",
-    "date": "7/10/26",
-    "records": 2320,
-    "volume": "2,320 active assets flagged on rooftop accounts not showing Active status, via Accounts with Assets - Custom report built with Luke at the rooftop level (not OEM level). Broken down as 2,152 Prospect, 100 Implementation, 68 Cancelled.",
-    "cause": "Asset Status and Account Status are not automatically kept in sync, active assets can persist on accounts that have moved to Prospect, Implementation, or Cancelled at the rooftop level with no automated flag or reconciliation step.",
-    "consequence": "Active assets tied to Cancelled accounts represent live billing/service exposure on terminated relationships. All 68 Cancelled-account assets were resolved directly. Report set to weekly Friday delivery to catch new instances going forward."
+      "id": "proj-014",
+      "name": "Active Assets on Inactive Accounts",
+      "status": "complete",
+      "date": "7/10/26",
+      "records": 2320,
+      "volume": "2,320 active assets flagged on rooftop accounts not showing Active status, via Accounts with Assets - Custom report built with Luke at the rooftop level (not OEM level). Broken down as 2,152 Prospect, 100 Implementation, 68 Cancelled.",
+      "cause": "Asset Status and Account Status are not automatically kept in sync, active assets can persist on accounts that have moved to Prospect, Implementation, or Cancelled at the rooftop level with no automated flag or reconciliation step.",
+      "consequence": "Active assets tied to Cancelled accounts represent live billing/service exposure on terminated relationships. All 68 Cancelled-account assets were resolved directly. Report set to weekly Friday delivery to catch new instances going forward."
     },
     {
-    "id": "proj-015",
-    "name": "Bundle Mixed-Completion States",
-    "status": "complete",
-    "date": "7/13/26",
-    "records": null,
-    "volume": "Identified bundles where some component Order Products show Onboarding Status = Complete while others remain Pending, built via Excel-based conflict detection pipeline (COUNTIFS per unique Order Number) with color-coded output by rooftop.",
-    "cause": "Assets and billing for a bundle only trigger once every component Order Product in the bundle reaches Complete status; partial completion silently blocks the bundle from ever generating an asset with no visible flag in Salesforce report builder, which can't natively isolate mixed-status groups.",
-    "consequence": "Bundles stuck in partial completion delay both asset creation and billing indefinitely with no native alert. Pipeline delivered to Andy Bohlin to identify and unblock affected bundles."
+      "id": "proj-015",
+      "name": "Bundle Mixed-Completion States",
+      "status": "complete",
+      "date": "7/13/26",
+      "records": null,
+      "volume": "Identified bundles where some component Order Products show Onboarding Status = Complete while others remain Pending, built via Excel-based conflict detection pipeline (COUNTIFS per unique Order Number) with color-coded output by rooftop.",
+      "cause": "Assets and billing for a bundle only trigger once every component Order Product in the bundle reaches Complete status; partial completion silently blocks the bundle from ever generating an asset with no visible flag in Salesforce report builder, which can't natively isolate mixed-status groups.",
+      "consequence": "Bundles stuck in partial completion delay both asset creation and billing indefinitely with no native alert. Pipeline delivered to Andy Bohlin to identify and unblock affected bundles."
     },
     {
-    "id": "proj-016",
-    "name": "Account Relationship Deduplication — Phase 1 & 2",
-    "status": "complete",
-    "date": "7/13/26",
-    "records": 8038,
-    "volume": "Phase 1: 67,079-row Account Relationship export reviewed with Katherine Brady; 6,838 records kept, 1,300 flagged for deletion, 9 flagged for review. Phase 2: active/implementation rooftop accounts with Sync to IDP = False reviewed against Luke's retention rules; 723 rows flagged for brand corrections plus 26 OEM mismatch records isolated for Luke's review. Both phases handed off.",
-    "cause": "Duplicate Account Relationship records and misaligned Related Brand/OEM fields accumulated with no dedup or validation pass since migration, driven by inconsistent MSA Pricing values, blank OEM fields resolved only by sibling-record inference, and no enforced rule preventing duplicate Account+OEM pairs from being created.",
-    "consequence": "Duplicate and misaligned relationship records inflate rooftop counts, distort OEM-level segmentation, and corrupt any account hierarchy or brand-based reporting built on Account Relationship data. Clean-up restores accuracy to relationship-based rollups; 26 OEM mismatches and Data Loader execution still pending Luke's confirmation."
+      "id": "proj-016",
+      "name": "Account Relationship Deduplication — Phase 1 & 2",
+      "status": "complete",
+      "date": "7/13/26",
+      "records": 8038,
+      "volume": "Phase 1: 67,079-row Account Relationship export reviewed with Katherine Brady; 6,838 records kept, 1,300 flagged for deletion, 9 flagged for review. Phase 2: active/implementation rooftop accounts with Sync to IDP = False reviewed against Luke's retention rules; 723 rows flagged for brand corrections plus 26 OEM mismatch records isolated for Luke's review. Both phases handed off.",
+      "cause": "Duplicate Account Relationship records and misaligned Related Brand/OEM fields accumulated with no dedup or validation pass since migration, driven by inconsistent MSA Pricing values, blank OEM fields resolved only by sibling-record inference, and no enforced rule preventing duplicate Account+OEM pairs from being created.",
+      "consequence": "Duplicate and misaligned relationship records inflate rooftop counts, distort OEM-level segmentation, and corrupt any account hierarchy or brand-based reporting built on Account Relationship data. Clean-up restores accuracy to relationship-based rollups; 26 OEM mismatches and Data Loader execution still pending Luke's confirmation."
     },
     {
       "id": "proj-017",
@@ -279,6 +279,46 @@
       "volume": "Board-level data correction with Andy Bohlin and Cecilia: identify churn records coded Internal that should have been Cancelled, and backfill a 'When should it have been cancelled?' date column. 1,061 rows deduplicated to 239 distinct Cancellation Reason Details strings, dates inferred and filled for 142 cases, 38 ambiguous cases returned grouped by failure type (vague relative time, year or quarter only, disputed dates, conflicting dates, implied but unstated). Phase 1 delivered to the Andy/Cecilia/Luke group.",
       "cause": "Cancel dates were never captured as structured data. The only record of when an account should have been cancelled lives in free-text retention case notes, so recovering the date requires parsing prose rather than querying a field. Cecilia also writes 'should have fallen off' language in the Notes field, not only in Description, so the first pass missed a source column entirely until Andy added a vlookup at column AJ.",
       "consequence": "Miscoded Internal churn understates true cancellation volume in board reporting. 142 of 239 distinct cases recovered on the first pass; second pass pending against the newly populated Notes column plus whatever Cecilia resolves manually. Structural point: this is a field-capture failure, not a data entry failure, and it will recur until a cancel date is required at case close."
+    },
+    {
+      "id": "proj-029",
+      "name": "Service 1.0/2.0 Migration Cohort & MRR Comparison by Rooftop",
+      "status": "complete",
+      "date": "7/28/26",
+      "records": 269,
+      "volume": "Luke requested two reports: a cohort of Active Accounts with Service AI 2.0 Active and Service AI 1.0 Inactive/Cancelled, and an Asset-level MRR/Net Unit Price comparison between the two versions grouped by Rooftop. Cohort returned 269 accounts. Built on 'Accounts with Assets' (standard) with two stacked cross filters. Flagged to Luke: a handful of cohort accounts missing a paired 2.0 asset row, and 7 accounts running both 1.0 and 2.0 active simultaneously, separate from the cohort.",
+      "cause": "Base Account filter initially used the wrong Status field (returned one account) before correcting to Account Status. Product cross filters required exact full product names, not shorthand. Rooftop field for the Asset-level report lives under Asset: Custom Info, not the Account level.",
+      "consequence": "Gives Luke a clean before/after MRR picture of the 1.0-to-2.0 migration by rooftop. The dual-active-version finding (7 accounts) surfaced a live billing overlap distinct from the cohort scope, and the missing-paired-asset accounts flag a possible migration gap worth a follow-up look."
+    },
+    {
+      "id": "proj-030",
+      "name": "MSA-OEM Subscription Term Bulk Clear",
+      "status": "complete",
+      "date": "7/30/26",
+      "records": 324,
+      "volume": "Order Products filtered to Onboarding Status = Pending, Order Quote Journey = MSA-OEM, Subscription Term not blank. Exported with Order Product ID, built a two-column CSV (ID + blank Subscription Term), updated via dataloader.io against OrderItem. First run failed with 324 errors because Quote Journey, though unchanged, is a restricted picklist rejected at the API level when mapped. Removing it from the field mapping fixed the load: 324 successes, 0 errors.",
+      "cause": "dataloader.io mapping any restricted-picklist field, even one whose value isn't changing, triggers API-level validation and fails the whole row. Only the match key and the field actually being written should be mapped.",
+      "consequence": "324 stale Subscription Term values cleared on pending MSA-OEM orders per Luke's request. Confirmed complete with Luke via Slack. Reusable fix for future dataloader.io jobs: unmap any field not being modified rather than assuming read-only/unchanged fields are safely ignored."
+    },
+    {
+      "id": "proj-031",
+      "name": "AI Marketing Short Contract Term Report for Danny Rastegar",
+      "status": "complete",
+      "date": "7/30/26",
+      "records": null,
+      "volume": "Danny Rastegar (via Luke) requested accounts on the AI Marketing product family with contract terms of 1, 3, or 6 months. Rebuilt from 'Assets and Intacct Contract' to 'Accounts with Assets - Custom' after discovering Danny's Sales profile had no access to the Asset object or Intacct Contract join. Saved as 'AI Marketing - 1/3/6 Month Terms' filtered on Product Family = AI Marketing, Status = Active, Contract Term = 1, 3, 6.",
+      "cause": "Danny's profile lacked Asset object access entirely, not just the Intacct Contract join, so the initial report type choice was unusable for him regardless of filter correctness. Also surfaced that Contract Term (DNU) is a deprecated field distinct from the live Contract Term field.",
+      "consequence": "Danny now has a standing, access-appropriate report for short-term AI Marketing contracts without requiring a permission change. Report type choice needs to account for the requester's object access, not just report logic."
+    },
+    {
+      "id": "proj-032",
+      "name": "Service AI 2.0 Duplicate $0/Non-Zero Asset Audit",
+      "status": "complete",
+      "date": "8/1/26",
+      "records": 170,
+      "volume": "Luke asked for accounts carrying two Service AI 2.0 assets, one priced at $0 and one non-zero, leftover duplicates from the 1.0-to-2.0 migration flagged for deletion. Built on the standard Assets report type (Product Name = Service AI 2.0, no status filter), grouped by Rooftop rather than Account Name to catch cross-account pairs. Python analysis found 185 rooftops matching the pattern, refined to 170 clean $0/non-zero duplicates and 15 rooftops where the two asset rows sat under different account names (13 of them under '24 Auto Group'). Delivered as a two-tab Excel workbook and flagged to Luke via Slack, including that several $0 rows were still Active status, not just Cancelled/Inactive as expected.",
+      "cause": "No automation deactivates or removes the $0 legacy asset row when Service AI 2.0 re-onboards under a new price, so duplicate pairs accumulate silently. Rooftop, not Account Name, is the correct grouping key since some duplicate pairs span two different account records under the same physical rooftop.",
+      "consequence": "170 clean duplicates ready for Luke's delete decision, plus a distinct 15-rooftop anomaly (account-name mismatch under one rooftop) isolated so it doesn't get bundled into the clean delete list. Active-status $0 rows in the mix mean this isn't purely inactive cleanup, some may reflect live billing confusion, which is why it was routed to Luke for a call rather than closed out unilaterally."
     }
   ],
   "deliverables": [

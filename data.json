@@ -319,6 +319,66 @@
       "volume": "Luke asked for accounts carrying two Service AI 2.0 assets, one priced at $0 and one non-zero, leftover duplicates from the 1.0-to-2.0 migration flagged for deletion. Built on the standard Assets report type (Product Name = Service AI 2.0, no status filter), grouped by Rooftop rather than Account Name to catch cross-account pairs. Python analysis found 185 rooftops matching the pattern, refined to 170 clean $0/non-zero duplicates and 15 rooftops where the two asset rows sat under different account names (13 of them under '24 Auto Group'). Delivered as a two-tab Excel workbook and flagged to Luke via Slack, including that several $0 rows were still Active status, not just Cancelled/Inactive as expected.",
       "cause": "No automation deactivates or removes the $0 legacy asset row when Service AI 2.0 re-onboards under a new price, so duplicate pairs accumulate silently. Rooftop, not Account Name, is the correct grouping key since some duplicate pairs span two different account records under the same physical rooftop.",
       "consequence": "170 clean duplicates ready for Luke's delete decision, plus a distinct 15-rooftop anomaly (account-name mismatch under one rooftop) isolated so it doesn't get bundled into the clean delete list. Active-status $0 rows in the mix mean this isn't purely inactive cleanup, some may reflect live billing confusion, which is why it was routed to Luke for a call rather than closed out unilaterally."
+    },
+    {
+      "id": "proj-033",
+      "name": "Service AI 2.0 Duplicate Audit Refinement",
+      "status": "complete",
+      "date": "8/3/26",
+      "records": 266,
+      "volume": "Luke redirected the original $0/non-zero duplicate audit (proj-032) with a corrected filter: Migration Source Org = Outsell, Product Name = Service AI 2.0, NetUnitPrice = $0. Migration Source Org was blank across all 507 originally filtered rows, invalidating Luke's first proposed filter; rebuilt with the corrected combination returned 266 rows, mixed Active/Cancelled/Inactive status. The '24 Auto Group' account-name mismatch resurfaced across multiple rooftops within the refined set (Rockland Nissan, Dartmouth Nissan, Middletown Mazda) and was flagged back to Luke.",
+      "cause": "Migration Source Org, the field expected to isolate legacy Outsell migration leftovers, was blank rather than populated with 'Outsell' on the first pass, so the original filter couldn't distinguish migration debris from records created post-implementation via RCA. Report also had to be rebuilt from scratch after losing all columns.",
+      "consequence": "266 confirmed Outsell-migration $0 duplicates handed back to Luke, distinct from the broader 507-row population. Active-status $0 rows still present, so this remains a detection handoff rather than a closed cleanup. Recurrence of the '24 Auto Group' anomaly across a second independent filter pass strengthens it as a real pattern, not noise."
+    },
+    {
+      "id": "proj-034",
+      "name": "CDJR Chat AI Without Service AI Report for Art",
+      "status": "complete",
+      "date": "8/3/26",
+      "records": 698,
+      "volume": "Art requested (via Austin Beckner) CDJR dealer accounts carrying Chat AI without Service AI. Built on 'Accounts With Order Products - CUSTOM' with two cross filters (WITH Chat AI, WITHOUT Service AI), CDJR brand isolated via the free-text 'Rooftop: Brands' field using 'contains' with comma-separated brand values. Returned 698 order product rows across 146 unique accounts (~4.8 order products per account).",
+      "cause": "CDJR brand isn't tracked at the Account level, it lives on the Rooftop object as free text, not a picklist, requiring a 'contains' operator with OR'd values instead of a clean match. 'Has A but not B' logic also isn't native to a single-pass report, requiring cross filters instead of a manual anti-join.",
+      "consequence": "Art has a standing cross-sell target list for CDJR dealers on Chat AI without Service AI. Report returns one row per order product, not per account, so a dealer with multiple rooftops shows multiple rows; flagged to Art in case he needs it deduped to one row per dealer."
+    },
+    {
+      "id": "proj-035",
+      "name": "Bill Rumble Dashboard Grouping Fix",
+      "status": "complete",
+      "date": "8/4/26",
+      "records": null,
+      "volume": "Bill Rumble requested the 'Lithia MBR's by CS Rep' report regroup from Account Owner to Assigned To, with Luke asking that the linked dashboard match. Report-side grouping swap was straightforward; the harder part was locating the correct dashboard, since the obvious candidate ('Lithia Dashboard Merch') didn't contain the component and had to be found by tracing the broken 'field no longer available' component the report change caused.",
+      "cause": "Dashboard components don't auto-refresh their field bindings when the underlying report's grouping changes, so re-pointing the report broke the linked component (Y-Axis still referencing the removed Account Owner field) until manually re-pointed to Assigned To.",
+      "consequence": "Report and dashboard now both reflect the Assigned To grouping Bill and Luke requested. General lesson: any report regrouping tied to a live dashboard needs the component checked and re-pointed manually, saving the report alone doesn't propagate the change."
+    },
+    {
+      "id": "proj-036",
+      "name": "Service AI 1.0+2.0 Dual-Active Rerun & Ford OEM Billing Flag",
+      "status": "complete",
+      "date": "8/5/26",
+      "records": null,
+      "volume": "Luke requested a rerun of the 6/24 dual-active report (accounts with active Service AI 1.0 AND 2.0 simultaneously) via cross filters on 'Accounts with Assets' (standard). During review, Luke surfaced a one-off billing edge case: Sam's Bass Drop Ford, a Ford OEM-billed store, was upgraded to Service AI 2.0 with the dealer billed at the upgrade price while Ford continued being billed at the original gross price.",
+      "cause": "No report filter can catch this kind of OEM-vs-dealer billing mismatch, since it requires comparing what Ford is invoiced against what the dealer is invoiced, data that doesn't sit in one filterable object. This is a pricing-logic question, not a data integrity gap.",
+      "consequence": "Dual-active cross filter rerun delivered to Luke per the standing report shape. Ford OEM billing case flagged and explicitly kicked to Luke as a billing-authority decision rather than something to build a report around, consistent with the detection-vs-remediation split."
+    },
+    {
+      "id": "proj-037",
+      "name": "CS Touch Activity Reports for Dony",
+      "status": "complete",
+      "date": "8/6/26",
+      "records": 945,
+      "volume": "Dony Kuriakose Bardenett asked whether Performance Managers were touching their accounts and which had gone untouched. Built two reports from scratch on 'Accounts with Activities' (custom): 'CS Touch - PM Activity Log (90 Days)' showing 945 PM touches across 64 PMs, and 'CS Touch - Accounts Not Touched (90 Days)' showing 83 PM-owned accounts with zero activity in the window. PM roster pulled from Setup > Users filtered by Role containing 'Performance Manager', reformatted from 'Last, First' to 'First Last' for the multi-value filter.",
+      "cause": "No single field or report type tracks PM-specific account touches directly; required isolating the custom 'last_activity_date_pm__c' field and confirming Created Date, not the standard 'Date' field (non-functional as a filter here), was the correct date to filter on.",
+      "consequence": "Dony now has two standing reports answering 'who's touching what' and 'what's gone quiet' for the PM book. Splitting into two reports rather than one combined report kept the answer to Dony's two-part question clean instead of crowding both views into one."
+    },
+    {
+      "id": "proj-038",
+      "name": "Lithia/Xtime MTD Bookings Investigation for Austin",
+      "status": "complete",
+      "date": "8/6/26",
+      "records": 5,
+      "volume": "Austin Beckner asked Alex to confirm Lithia dealer signups for a Service AI xtime initiative against a list Jon Clark had shared. Initial investigation chased Account-level integration fields (Xtime Integration Enabled checkbox, then Scheduling Provider picklist) before the real answer surfaced from cross-referencing Jon's actual MTD Bookings by rep export: 5 Lithia rooftops (Atlantic Coast Acura, New Port Richey Volkswagen, Santa Monica Audi, Downtown LA Volkswagen, DCH Paramus Honda) signed Service AI last month, totaling ~$12,899 MRR, matching Jon's own 'we hit 13' recollection almost exactly.",
+      "cause": "'Signed up' meant actual Opportunity Product line-item bookings (Product Name = Service AI 1.0/2.0, Ultimate Parent Account = Lithia), not an Account-level integration status field. The right data source was a report Jon had already built and handed over, not something Object Manager digging could ever surface.",
+      "consequence": "Correct answer delivered and confirmed against Jon's own numbers. This MTD Bookings by rep report is now the source of truth for signup-style questions going forward, and Jon's ask doubles as validation for Austin's monthly initiative tracker idea. Next step: confirm with Benjy whether Gumloop's Salesforce read access covers Opportunity Product line items before scoping that as a build."
     }
   ],
   "deliverables": [

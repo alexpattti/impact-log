@@ -379,6 +379,46 @@
       "volume": "Austin Beckner asked Alex to confirm Lithia dealer signups for a Service AI xtime initiative against a list Jon Clark had shared. Initial investigation chased Account-level integration fields (Xtime Integration Enabled checkbox, then Scheduling Provider picklist) before the real answer surfaced from cross-referencing Jon's actual MTD Bookings by rep export: 5 Lithia rooftops (Atlantic Coast Acura, New Port Richey Volkswagen, Santa Monica Audi, Downtown LA Volkswagen, DCH Paramus Honda) signed Service AI last month, totaling ~$12,899 MRR, matching Jon's own 'we hit 13' recollection almost exactly.",
       "cause": "'Signed up' meant actual Opportunity Product line-item bookings (Product Name = Service AI 1.0/2.0, Ultimate Parent Account = Lithia), not an Account-level integration status field. The right data source was a report Jon had already built and handed over, not something Object Manager digging could ever surface.",
       "consequence": "Correct answer delivered and confirmed against Jon's own numbers. This MTD Bookings by rep report is now the source of truth for signup-style questions going forward, and Jon's ask doubles as validation for Austin's monthly initiative tracker idea. Next step: confirm with Benjy whether Gumloop's Salesforce read access covers Opportunity Product line items before scoping that as a build."
+    },
+    {
+      "id": "proj-039",
+      "name": "Bundle Mixed-Completion States — August Rerun",
+      "status": "complete",
+      "date": "8/19/26",
+      "records": 288,
+      "volume": "Andy Bohlin requested another rerun of the bundle conflict pipeline (following proj-015 and the 7/22 rerun in proj-023). Source export rebuilt fresh from 'Order Products - Custom' since no saved export persists between runs, now including the Onboarding Process Complete Date field Luke added since the last pass. Pipeline returned 70 conflicting orders across 288 rows. Added a bolded 'Pending Totals (Conflicting Orders Only)' summary row directly into the file at Andy's request, rather than just stating totals in chat: [INSERT pending MRR / pending NUP from the file].",
+      "cause": "Same root cause as proj-015/proj-023: bundles only trigger assets and billing once every component Order Product hits Complete, and Salesforce can't natively isolate mixed-status groups within a bundle. No saved report or export persists between reruns, so every request means rebuilding the source pull from scratch.",
+      "consequence": "Andy has a current view of which bundles are still stuck behind partial completion and the pending MRR/NUP tied up in them, with totals now living in the deliverable itself instead of a chat message that gets lost. Delivered to Andy with a short Slack summary."
+    },
+    {
+      "id": "proj-040",
+      "name": "eLEAD CDK Quarterly Reconciliation",
+      "status": "complete",
+      "date": "8/20/26",
+      "records": 3017,
+      "volume": "Quarterly CDK-vs-Salesforce eLEAD reconciliation, matching ~3,735 CDK-listed dealers (list as of 7/6) against Salesforce rooftop accounts flagged Dealer CRM = eLEAD. Fuzzy name matching alone wasn't reliable enough; website domain cross-matching became the primary signal, and a late-stage cross-check against the full 'No' bucket surfaced 265 additional matches name-matching had missed. Collision audits (one CDK entry matching multiple SF accounts) caught further corrections. Final: 1,326 Yes (still eLEAD, no change), 1,689 No (dropped off CDK's list, eligible for SF update), 2 permanently unresolved (Ira Subaru of Manchester, #1 Cochran Ford Monroeville). Delivered as Rooftop_Accounts_Ready.xlsx to Seth and Luke.",
+      "cause": "No automated pipeline keeps Salesforce's eLEAD flag in sync with CDK's actual current list, so the two drift every quarter and require a full manual re-match. Name matching alone misses legal-name variants, punctuation differences, and rebrands (e.g. Crossroads Chevrolet), which only website-domain cross-referencing catches.",
+      "consequence": "1,689 accounts are now confirmed eligible to be sold Sales AI without the eLEAD $1,000/month penalty, meaningfully more than pure name-matching would have found. Also surfaced two data hygiene issues outside the main reconciliation: a wrong website on Ocean Honda of Brockton (row 2696, should be oceanhondabrockton.com) and three Salesforce duplicate records (Findlay CDJR Post Falls, Jenkins VW of Leesburg, Mtn View Nissan), flagged separately. Scoped afterward with Benjy as a candidate for a Gumloop automation build."
+    },
+    {
+      "id": "proj-041",
+      "name": "Kudos Tracker Gumloop Agent — Production Launch",
+      "status": "complete",
+      "date": "8/20/26",
+      "records": 44,
+      "volume": "Built and shipped a Gumloop agent that reads the #kudos Slack channel (channel ID CH3DVS7HS directly, bypassing name-based lookup which fails on the missing search:read.public scope) and appends Kudos Date, Sales Rep, Rooftop, and MRR to Lilly's live tracker sheet, running on a daily 9am trigger. Presented at a Thursday team demo, after which Lilly granted edit access to the live production sheet. Backfilled August 1 to 19 same day (44 rows, rows 226 to 269).",
+      "cause": "Manual kudos logging into the tracker was inconsistent and depended on someone remembering to transcribe Slack posts by hand. Correct extraction also required a 'rep of record' rule to avoid crediting non-closing mentions, surfaced by a real case where a CEO was tagged in a kudos post but wasn't the closing rep.",
+      "consequence": "Kudos logging is now fully automated with no manual step, and runs off the confirmed live sheet rather than one of the stale copies that caused silent wrong-sheet writes during testing. Known open follow-up: Gumloop's Sheets Writer writes RAW values only, so MRR lands as text, not a number, requiring a manual VALUE() conversion until the write step is rebuilt or Gumloop ships a fix. Dropdown validation range and rep-name spelling mismatches (Thiel vs Theil Valdes, Zach vs Zack Mulvaney) also still need fixing."
+    },
+    {
+      "id": "proj-042",
+      "name": "Salesforce Report Library Audit",
+      "status": "complete",
+      "date": "8/21/26",
+      "records": 55,
+      "volume": "Full audit of all 55 saved Salesforce reports, cross-referencing each against past project history to confirm whether its name still reflected its actual filter logic and purpose. Renamed reports where the name was stale or generic (e.g. 'Report 7-10' to 'Order Products - Complete, No Asset', the ambiguous 'New Order Products - Custom Report' to 'Order Products - Salman Onboarding No-Asset Check'), and flagged three reports (Bookings Fill-in, Finding Product ID Name, Active Sales AI Assets - Term Review) that couldn't be verified from history for manual review.",
+      "cause": "Report names had drifted from their actual purpose over months of ad hoc builds and reruns, leaving generic placeholder names, duplicate near-identical reports, and at least one actively subscribed weekly report ('Sales AI and Lead Nurture Validation') whose filter logic used OR instead of AND, making its name misleading about what it actually returns.",
+      "consequence": "The report library now reflects what each report actually does, cutting the risk of picking the wrong saved report for a task, which had already caused at least one rework incident (the 'New Order Products' mixup on the Bundle Status Conflicts workstream). The OR-logic issue on the subscribed weekly report is a live accuracy risk worth flagging separately to whoever relies on it."
     }
   ],
   "deliverables": [

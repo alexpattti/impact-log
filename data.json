@@ -26,7 +26,7 @@
       "status": "complete",
       "date": "5/27/26",
       "records": 732,
-      "volume": "732 priority rows reviewed (active Sales AI assets with blank Contract Term and populated Lifecycle End Date); 300 filled with no conflicts, 15 conflicts flagged against Sage data, 415 deferred to Johnathan's Data Loader upload",
+      "volume": "732 priority rows reviewed (active Sales AI assets with blank Contract Term and populated Lifecycle End Date); 300 filled with no conflicts, 15 conflicts flagged against Sage data, 415 deferred to Spence's Data Loader upload",
       "cause": "Contract Term field blank for active assets — not carried over during Salesforce migration. Sage Intacct billing records contain the data but it was not mapped or backfilled, leaving a gap between what billing knows and what SF shows. Some records resolving via Sage report; others require manual PDF contract lookup.",
       "consequence": "Contract Term feeds renewal forecasting, churn risk identification, and lifecycle management. Without it, Impel cannot accurately predict when contracts roll off or flag at-risk renewals — directly undermining the retention-focused GRR/NRR tracking Elizabeth and Andy prioritize."
     },
@@ -246,7 +246,7 @@
       "status": "complete",
       "date": "7/23/26",
       "records": 22,
-      "volume": "Luke relayed a request from Johnathan testing the hypothesis that some Order Products without assets had slipped through without a rooftop assignment. Built 'Assets Without Rooftop - Custom' on the Accounts with Assets report type with a null filter on Rooftop, trimmed to relevant columns. Returned 22 records. Report link and count sent back to Luke; Johnathan confirmed the result matched expectations.",
+      "volume": "Luke relayed a request from Spence testing the hypothesis that some Order Products without assets had slipped through without a rooftop assignment. Built 'Assets Without Rooftop - Custom' on the Accounts with Assets report type with a null filter on Rooftop, trimmed to relevant columns. Returned 22 records. Report link and count sent back to Luke; Spence confirmed the result matched expectations.",
       "cause": "Rooftop is not enforced on asset creation, but the 22 records are almost entirely legacy Cancelled or Inactive assets with zero Active records, meaning this is residue from historical data rather than an active automation failure.",
       "consequence": "Hypothesis disproven. Explicitly ruled out as supporting evidence for the Salman asset creation gap escalation, which matters because attaching an unrelated 22-record population to a 1,399-record automation failure would have weakened the escalation rather than strengthened it."
     },
@@ -342,7 +342,7 @@
     },
     {
       "id": "proj-035",
-      "name": "Bill Dashboard Grouping Fix",
+      "name": "Dashboard Grouping Fix for Bill",
       "status": "complete",
       "date": "8/4/26",
       "records": null,

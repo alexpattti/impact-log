@@ -19,9 +19,14 @@
   </div>
 </div>
 <div class="totals-bar">
-  <div class="total-card"><div class="tl">Projects logged</div><div class="tv" id="stat-projects">0</div></div>
   <div class="total-card"><div class="tl">Records touched</div><div class="tv" id="stat-records">0</div></div>
-  <div class="total-card"><div class="tl">Completed</div><div class="tv" id="stat-done">0</div></div>
+  <div class="total-card"><div class="tl">Projects logged</div><div class="tv" id="stat-projects">0</div></div>
+  <div class="open-wrap">
+    <button class="total-card total-link" id="open-card" type="button">
+      <div class="tl">Open projects <span class="tl-arrow">&darr;</span></div><div class="tv" id="stat-open">0</div>
+    </button>
+    <div class="open-menu" id="open-menu"></div>
+  </div>
 </div>
 <div class="folders" id="folders"></div>
 <div class="footer">
@@ -83,7 +88,7 @@ function field(label, val, hl) {
           <div class="field-val${hl ? ' highlight' : ''}">${escHtml(val)}</div></div>`;
 }
 function projectCard(e) {
-  return `<div class="entry">
+  return `<div class="entry" data-id="${escHtml(e.id)}">
     <div class="entry-head">
       <div><div class="entry-name">${escHtml(e.name)}</div><div class="entry-date">${escHtml(e.date)}</div></div>
       <span class="status-badge ${e.status === 'complete' ? 'status-complete' : 'status-wip'}">${escHtml(e.status)}</span>
@@ -209,9 +214,9 @@ const SPRING_OPEN = { type: 'spring', visualDuration: 0.55, bounce: 0.12 };
 const CLOSE_TWEEN = { duration: 0.42, ease: [0.45, 0, 0.6, 0.75] };
 
 // Open: the paper slides up out of the folder and, without stopping, grows into the page.
-function openFolder(key, animate) {
+function openFolder(key, animate, focusId) {
   current = key;
-  if (!animate || reduceMotion) { showSheet(key); return; }
+  if (!animate || reduceMotion) { showSheet(key); if (focusId) focusEntry(focusId); return; }
   busy = true;
   const paper = papers[key], folder = paper.closest('.folder');
   const front = folder.querySelector('.folder-front');
@@ -235,9 +240,50 @@ function openFolder(key, animate) {
       void folder.offsetWidth;
       folder.classList.remove('no-anim');
       busy = false;
+      if (focusId) focusEntry(focusId);
     });
   }
 }
+
+// Scroll the open folder to one project and give it a short highlight.
+function focusEntry(id) {
+  const card = sheet.querySelector(`.entry[data-id="${CSS.escape(id)}"]`);
+  if (!card) return;
+  const top = card.getBoundingClientRect().top - sheet.getBoundingClientRect().top + sheet.scrollTop - 24;
+  sheet.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
+  card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+}
+
+// ---------- Open projects box ----------
+// One open project: the box takes you straight to it (its folder opens, then scrolls to it).
+// Several: the box shows a short list, and each one takes you to its project the same way.
+const openCard = document.getElementById('open-card');
+const openMenu = document.getElementById('open-menu');
+function openProjects() {
+  return (items || []).filter(i => i.kind !== 'deliverable' && i.status !== 'complete');
+}
+function goToProject(e) {
+  openMenu.classList.remove('show');
+  if (busy || current) return;
+  history.pushState({ folder: e.category }, '', '#' + e.category);
+  openFolder(e.category, true, e.id);
+}
+openCard.addEventListener('click', ev => {
+  ev.stopPropagation();
+  const open = openProjects();
+  if (open.length === 0) return;
+  if (open.length === 1) return goToProject(open[0]);
+  openMenu.innerHTML = open.map((e, i) => `
+    <button type="button" class="open-item" data-i="${i}">
+      <span class="open-name">${escHtml(e.name)}</span>
+      <span class="open-folder">${escHtml(CATEGORIES[e.category].name)}</span>
+    </button>`).join('');
+  openMenu.querySelectorAll('.open-item').forEach(b =>
+    b.addEventListener('click', () => goToProject(open[+b.dataset.i])));
+  openMenu.classList.toggle('show');
+});
+document.addEventListener('click', () => openMenu.classList.remove('show'));
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') openMenu.classList.remove('show'); });
 
 // Close: the page shrinks back into a paper above the folder, then slides down into it.
 function closeFolder(animate) {
@@ -292,7 +338,9 @@ loadData().then(data => {
   items = data;
   const projects = items.filter(i => i.kind !== 'deliverable');
   document.getElementById('stat-projects').textContent = items.length;
-  document.getElementById('stat-done').textContent = projects.filter(p => p.status === 'complete').length;
+  const openCount = projects.filter(p => p.status !== 'complete').length;
+  document.getElementById('stat-open').textContent = openCount;
+  if (!openCount) openCard.classList.add('none');
   document.getElementById('stat-records').textContent =
     projects.reduce((s, p) => s + (typeof p.records === 'number' ? p.records : 0), 0).toLocaleString();
   Object.keys(CATEGORIES).forEach(key => {

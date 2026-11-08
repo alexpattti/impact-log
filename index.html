@@ -4,70 +4,314 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Impel // Impact Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="entering">
-<div class="header page-fade">
+<body>
+
+<!-- ============ Main page: the three folders ============ -->
+<div class="header">
   <div>
     <div class="label">Alex Patti // Impel AI Sales Ops Internship</div>
     <h1>The Impact Log</h1>
   </div>
 </div>
-<div class="totals-bar page-fade">
+<div class="totals-bar">
   <div class="total-card"><div class="tl">Projects logged</div><div class="tv" id="stat-projects">0</div></div>
   <div class="total-card"><div class="tl">Records touched</div><div class="tv" id="stat-records">0</div></div>
   <div class="total-card"><div class="tl">Completed</div><div class="tv" id="stat-done">0</div></div>
 </div>
 <div class="folders" id="folders"></div>
-<div class="footer page-fade">
+<div class="footer">
   <span>ALEX PATTI // IMPEL AI</span>
-  <span id="footer-date"></span>
+  <span class="footer-date"></span>
 </div>
+
+<!-- ============ Folder view: the "paper", one screen tall, scrolls inside ============ -->
+<div class="sheet" id="sheet">
+  <div class="sheet-inner" id="sheet-inner"></div>
+</div>
+
+<script src="motion.js"></script>
 <script src="common.js"></script>
 <script>
-loadData().then(items => {
+// Everything lives on this one page. Opening a folder changes the address to
+// index.html#automation (or #data-ops, #misc), so the back button and links still work,
+// but nothing new has to load.
+
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sheet = document.getElementById('sheet');
+const sheetInner = document.getElementById('sheet-inner');
+const papers = {};
+let items = null;
+let current = null;   // which folder is open, or null
+let busy = false;     // true while an animation runs
+
+// ---------- 1. Build the folders ----------
+const wrap = document.getElementById('folders');
+Object.entries(CATEGORIES).forEach(([key, cat]) => {
+  const a = document.createElement('a');
+  a.className = 'folder';
+  a.href = '#' + key;
+  a.innerHTML = `
+    <div class="folder-tab"></div>
+    <div class="folder-back">
+      <div class="folder-paper"></div>
+      <div class="folder-front">
+        <div class="folder-count">&nbsp;</div>
+        <div class="folder-name">${escHtml(cat.name)}</div>
+        <div class="folder-sub">${escHtml(cat.sub)}</div>
+      </div>
+    </div>`;
+  papers[key] = a.querySelector('.folder-paper');
+  a.addEventListener('click', ev => {
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey) return;   // new-tab clicks work normally
+    ev.preventDefault();
+    if (busy || current) return;
+    history.pushState({ folder: key }, '', '#' + key);
+    openFolder(key, true);
+  });
+  wrap.appendChild(a);
+});
+
+// ---------- 2. Fill in a folder's page ----------
+function field(label, val, hl) {
+  if (!val) return '';
+  return `<div class="field"><div class="field-label">${label}</div>
+          <div class="field-val${hl ? ' highlight' : ''}">${escHtml(val)}</div></div>`;
+}
+function projectCard(e) {
+  return `<div class="entry">
+    <div class="entry-head">
+      <div><div class="entry-name">${escHtml(e.name)}</div><div class="entry-date">${escHtml(e.date)}</div></div>
+      <span class="status-badge ${e.status === 'complete' ? 'status-complete' : 'status-wip'}">${escHtml(e.status)}</span>
+    </div>
+    ${field('Volume', e.volume, true)}
+    ${field('Root cause', e.cause)}
+    ${field('Downstream consequence', e.consequence)}
+  </div>`;
+}
+function deliverableCard(e) {
+  return `<div class="entry">
+    <div class="entry-head">
+      <div><div class="entry-name">${escHtml(e.name)}</div><div class="entry-date">${escHtml(e.date)}</div></div>
+      <span class="status-badge status-complete">deliverable</span>
+    </div>
+    ${field('Audience', e.audience)}
+    ${field('Summary', e.summary, true)}
+    ${field('Context', e.context)}
+  </div>`;
+}
+// The whole folder page as HTML. The same HTML fills the full page AND the little paper
+// in each folder, so the paper is a true miniature of the page.
+function folderHTML(key) {
+  const cat = CATEGORIES[key];
+  const inCat = (items || []).filter(i => i.category === key);
+  const projects = inCat.filter(i => i.kind !== 'deliverable').reverse();
+  const delivs = inCat.filter(i => i.kind === 'deliverable');
+  const done = inCat.filter(i => i.kind === 'deliverable' || i.status === 'complete').length;
+  const records = projects.reduce((s, p) => s + (typeof p.records === 'number' ? p.records : 0), 0);
+  let body = '';
+  if (projects.length) body += `<div class="section-title">Projects</div><div class="entries-grid">${projects.map(projectCard).join('')}</div>`;
+  if (delivs.length) body += `<div class="section-title">Leadership deliverables</div><div class="entries-grid">${delivs.map(deliverableCard).join('')}</div>`;
+  return `
+    <a class="back-link" href="#">&larr; All folders</a>
+    <div class="header" style="margin-top:1.25rem">
+      <div>
+        <div class="label">The Impact Log // Folder</div>
+        <h1>${escHtml(cat.name)}</h1>
+      </div>
+    </div>
+    <div class="totals-bar">
+      <div class="total-card"><div class="tl">Entries</div><div class="tv">${inCat.length}</div></div>
+      <div class="total-card"><div class="tl">Records touched</div><div class="tv">${records.toLocaleString()}</div></div>
+      <div class="total-card"><div class="tl">Completed</div><div class="tv">${done}</div></div>
+    </div>
+    <div>${body || '<div class="empty-state">Nothing in this folder yet</div>'}</div>
+    <div class="footer">
+      <span>ALEX PATTI // IMPEL AI</span>
+      <span class="footer-date"></span>
+    </div>`;
+}
+function renderFolder(key) {
+  sheetInner.innerHTML = folderHTML(key);
+  document.title = 'Impact Log // ' + CATEGORIES[key].name;
+  footerDate();
+}
+
+// Each folder's paper holds a full-size copy of its page, shrunk to fit. The scale matches
+// the one the animation starts from, so paper and page line up exactly.
+const scrollMemory = {};   // where you left each folder scrolled, so the paper shows the same spot
+function paperScale(paper) {
+  return Math.max(paper.offsetWidth / innerWidth, paper.offsetHeight / innerHeight);
+}
+function buildPreviews() {
+  Object.keys(CATEGORIES).forEach(key => {
+    const paper = papers[key];
+    paper.classList.add('has-preview');
+    paper.innerHTML = `<div class="paper-preview"><div class="sheet-inner">${folderHTML(key)}</div></div>`;
+    sizePreview(key);
+  });
+  footerDate();
+}
+function sizePreview(key) {
+  const paper = papers[key];
+  const pv = paper.querySelector('.paper-preview');
+  if (!pv) return;
+  pv.style.width = innerWidth + 'px';
+  pv.style.height = innerHeight + 'px';
+  pv.style.transform = `scale(${paperScale(paper)})`;
+  pv.firstElementChild.style.transform = `translateY(${-(scrollMemory[key] || 0)}px)`;
+}
+addEventListener('resize', () => Object.keys(CATEGORIES).forEach(sizePreview));
+
+// ---------- 3. The animations ----------
+// The folder page itself is the paper. It is drawn at full size the whole time, then shrunk
+// and cropped to the paper's spot, so its real text is visible through the entire grow.
+// Motion (motion.dev) drives it with a spring, so it moves like a physical object.
+const W = () => innerWidth, H = () => innerHeight;
+const lerp = (a, b, t) => a + (b - a) * t;
+const WHITE = [255, 255, 255], BGC = [245, 243, 239];   // paper white -> page background
+function placeSheet(r, p) {
+  // p = 0: sheet sits exactly on the paper. p = 1: sheet fills the screen.
+  const s0 = Math.max(r.width / W(), r.height / H());   // same scale as the paper's miniature
+  const s = lerp(s0, 1, p);
+  const tx = lerp(r.left, 0, p), ty = lerp(r.top, 0, p);
+  const visW = lerp(r.width, W(), p) / s, visH = lerp(r.height, H(), p) / s;
+  const right = Math.max(0, W() - visW), bottom = Math.max(0, H() - visH);
+  const radius = lerp(3, 0, Math.min(1, p)) / s;
+  sheet.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+  sheet.style.clipPath = `inset(0px ${right}px ${bottom}px 0px round ${radius}px)`;
+  const c = WHITE.map((v, i) => Math.round(lerp(v, BGC[i], Math.min(1, Math.max(0, p)))));
+  sheet.style.backgroundColor = `rgb(${c})`;
+}
+function clearSheetStyles() {
+  ['transform', 'clipPath', 'backgroundColor', 'willChange'].forEach(k => sheet.style[k] = '');
+}
+function showSheet(key) {
+  renderFolder(key);
+  sheet.scrollTop = scrollMemory[key] || 0;   // pick up where the paper shows
+  sheet.classList.add('open');
+  document.body.classList.add('sheet-open');
+}
+function hideSheet() {
+  sheet.classList.remove('open');
+  document.body.classList.remove('sheet-open');
+  clearSheetStyles();
+  document.title = 'Impel // Impact Log';
+}
+const SPRING_OPEN = { type: 'spring', visualDuration: 0.55, bounce: 0.12 };
+// Closing is a timed tween, not a spring: a spring creeps to its final spot for a while,
+// which is the pause you saw. This one still has speed when it arrives, so the drop into
+// the folder starts on the very next frame, like turning a corner without stopping.
+const CLOSE_TWEEN = { duration: 0.42, ease: [0.45, 0, 0.6, 0.75] };
+
+// Open: the paper slides up out of the folder and, without stopping, grows into the page.
+function openFolder(key, animate) {
+  current = key;
+  if (!animate || reduceMotion) { showSheet(key); return; }
+  busy = true;
+  const paper = papers[key], folder = paper.closest('.folder');
+  const front = folder.querySelector('.folder-front');
+  folder.classList.add('lifted');                          // slide up, behind the front flap
+  const started = performance.now();
+  (function watch() {                                      // hand off once it clears the flap
+    const clear = paper.getBoundingClientRect().bottom <= front.getBoundingClientRect().top + 6;
+    if (clear || performance.now() - started > 450) grow(); else requestAnimationFrame(watch);
+  })();
+  function grow() {
+    const r = paper.getBoundingClientRect();
+    showSheet(key);
+    sheet.style.willChange = 'transform, clip-path';
+    placeSheet(r, 0);
+    paper.style.visibility = 'hidden';
+    Motion.animate(0, 1, { ...SPRING_OPEN, onUpdate: p => placeSheet(r, p) }).then(() => {
+      clearSheetStyles();
+      paper.style.visibility = '';
+      folder.classList.add('no-anim');
+      folder.classList.remove('lifted');                   // paper back in place, hidden behind the page
+      void folder.offsetWidth;
+      folder.classList.remove('no-anim');
+      busy = false;
+    });
+  }
+}
+
+// Close: the page shrinks back into a paper above the folder, then slides down into it.
+function closeFolder(animate) {
+  const key = current;
+  current = null;
+  if (!key || !animate || reduceMotion) { hideSheet(); return; }
+  busy = true;
+  const paper = papers[key], folder = paper.closest('.folder');
+  scrollMemory[key] = sheet.scrollTop;                    // paper will show the same spot
+  sizePreview(key);
+  folder.classList.add('no-anim', 'lifted');              // where the paper waits, above the folder
+  const r = paper.getBoundingClientRect();
+  paper.style.visibility = 'hidden';
+  sheet.style.willChange = 'transform, clip-path';
+  Motion.animate(1, 0, { ...CLOSE_TWEEN, onUpdate: p => placeSheet(r, p) }).then(() => {
+    hideSheet();
+    paper.style.visibility = '';
+    folder.classList.remove('no-anim');
+    void folder.offsetWidth;
+    folder.classList.remove('lifted');                     // slide back down into the folder
+    setTimeout(() => {
+      // Once the paper is tucked in, quietly roll its miniature back to the top of the page,
+      // so the folder always previews the title and the next open starts at the top.
+      const inner = paper.querySelector('.paper-preview > .sheet-inner');
+      if (inner && scrollMemory[key]) {
+        inner.style.transition = 'transform 0.6s ease';
+        scrollMemory[key] = 0;
+        inner.style.transform = 'translateY(0px)';
+        setTimeout(() => { inner.style.transition = ''; }, 650);
+      }
+      busy = false;
+    }, 500);
+  });
+}
+
+// ---------- 4. Back button, links and the address bar ----------
+sheet.addEventListener('click', ev => {
+  if (!ev.target.closest('.back-link')) return;
+  ev.preventDefault();
+  if (busy) return;
+  if (history.state && history.state.folder) history.back();         // came from a folder click
+  else { history.pushState(null, '', location.pathname); closeFolder(true); } // opened by direct link
+});
+window.addEventListener('popstate', () => {
+  const key = location.hash.slice(1);
+  if (CATEGORIES[key]) { if (current !== key) openFolder(key, false); }
+  else if (current) closeFolder(true);
+});
+
+// ---------- 5. Load the data ----------
+loadData().then(data => {
+  items = data;
   const projects = items.filter(i => i.kind !== 'deliverable');
   document.getElementById('stat-projects').textContent = items.length;
   document.getElementById('stat-done').textContent = projects.filter(p => p.status === 'complete').length;
   document.getElementById('stat-records').textContent =
     projects.reduce((s, p) => s + (typeof p.records === 'number' ? p.records : 0), 0).toLocaleString();
-
-  const wrap = document.getElementById('folders');
-  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+  Object.keys(CATEGORIES).forEach(key => {
     const inCat = items.filter(i => i.category === key);
-    const a = document.createElement('a');
-    a.className = 'folder';
-    a.href = 'folder.html?c=' + key;
-    a.innerHTML = `
-      <div class="folder-tab"></div>
-      <div class="folder-back">
-        <div class="folder-paper">
-          ${inCat.slice(-6).reverse().map(i => `<div>${escHtml(i.name)}</div>`).join('')}
-        </div>
-        <div class="folder-front">
-          <div class="folder-count">${inCat.length} ${inCat.length === 1 ? 'entry' : 'entries'}</div>
-          <div class="folder-name">${escHtml(cat.name)}</div>
-          <div class="folder-sub">${escHtml(cat.sub)}</div>
-        </div>
-      </div>`;
-    a.addEventListener('click', ev => {
-      ev.preventDefault();
-      a.classList.add('opening');
-      document.body.classList.add('leaving');
-      setTimeout(() => { window.location.href = a.href; }, 650);
-    });
-    wrap.appendChild(a);
+    // Stack size: 1 entry = 1 sheet, 2 to 5 = 2 sheets, 6 or more = 3 sheets (the cap)
+    const sheets = inCat.length >= 6 ? 3 : inCat.length >= 2 ? 2 : 1;
+    for (let i = sheets - 1; i >= 1; i--) {
+      papers[key].insertAdjacentHTML('beforebegin', `<div class="paper-under u${i}"></div>`);
+    }
+    papers[key].nextElementSibling.querySelector('.folder-count').textContent =
+      `${inCat.length} ${inCat.length === 1 ? 'entry' : 'entries'}`;
   });
-  footerDate();
+  buildPreviews();
+  // Opened with a folder already in the address (a shared link or a refresh): show it directly.
+  const key = location.hash.slice(1);
+  if (CATEGORIES[key]) openFolder(key, false);
 }).catch(err => {
-  document.getElementById('folders').innerHTML = '<div class="empty-state">Could not load data.json</div>';
+  wrap.insertAdjacentHTML('afterend', '<div class="empty-state">Could not load data.json</div>');
   console.error(err);
-});
-// Reset state if the user comes back with the browser back button
-window.addEventListener('pageshow', () => {
-  document.body.classList.remove('leaving');
-  document.querySelectorAll('.folder.opening').forEach(f => f.classList.remove('opening'));
 });
 </script>
 </body>

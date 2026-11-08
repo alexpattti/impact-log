@@ -237,9 +237,40 @@
     letter-spacing: 0.08em;
     color: var(--text-dim);
     overflow: hidden;
-    transition: transform 0.45s cubic-bezier(.2,.8,.2,1);
+    transition: transform 0.45s cubic-bezier(.35,.9,.3,1);
   }
-  .folder-paper div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.9; }
+  /* Extra sheets behind the front paper, so fuller folders look like a stack */
+  .paper-under {
+    position: absolute;
+    left: 7%; right: 7%;
+    top: 14px; bottom: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: transform 0.5s cubic-bezier(.3,.75,.25,1);
+  }
+  .paper-under.u1 { transform: translate(7px, -6px) rotate(1.6deg); background: #FBFAF8; }
+  .paper-under.u2 { transform: translate(-6px, -11px) rotate(-2.2deg); background: #F7F5F2; }
+  .folder:hover .paper-under.u1 { transform: translate(7px, -14px) rotate(2.2deg); }
+  .folder:hover .paper-under.u2 { transform: translate(-6px, -20px) rotate(-3deg); }
+  /* Paper holding a shrunk copy of its folder's page */
+  .folder-paper.has-preview { padding: 0; border: none; box-shadow: 0 0 0 1px var(--border); }
+  .paper-preview {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0;
+    pointer-events: none;
+    background: var(--surface);
+    /* undo the paper's small mono text so the copy looks exactly like the page */
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: normal;
+    line-height: 1.7;
+    color: var(--text);
+    overflow: hidden;
+  }
+  .folder-paper:not(.has-preview) div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.9; }
   .folder-front {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -277,16 +308,33 @@
     margin-top: 0.4rem;
     line-height: 1.45;
   }
-  /* opening animation */
-  .folder.opening { z-index: 5; }
-  .folder.opening .folder-front { transform: rotateX(-72deg); }
-  .folder.opening .folder-paper { transform: translateY(-60px) scale(1.04); }
-  .page-fade { transition: opacity 0.35s ease 0.3s; }
-  body.leaving .page-fade { opacity: 0; }
-  body.entering { animation: enter 0.45s ease both; }
-  @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  /* Taking the paper out: it slides up from behind the front flap until it clears the folder.
+     Putting it back is the same slide in reverse. */
+  .folder.lifted { z-index: 5; }
+  .folder.lifted .folder-paper { transform: translateY(-185px); transition-duration: 0.32s; }
+  .folder.lifted .folder-front { transform: rotateX(-18deg); }
+  .folder.no-anim .folder-paper,
+  .folder.no-anim .folder-front { transition: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .folder-paper, .folder-front, .paper-under { transition: none !important; }
+  }
 
   /* ---------- Folder page ---------- */
+  /* The sheet is exactly one screen tall and scrolls inside, so the paper always
+     grows to the screen's size, not to the full length of a long page. */
+  .sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    overflow-y: auto;
+    background: var(--bg);
+    display: none;
+  }
+  .sheet { transform-origin: 0 0; }
+  .sheet.open { display: block; }
+  body.sheet-open { overflow: hidden; }
+  .sheet-inner { max-width: 1500px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
   .back-link {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.68rem;

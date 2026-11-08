@@ -15,7 +15,20 @@ function loadData() {
     return items;
   });
 }
+// Footer: "CREATED MAY 2026 ⋅ UPDATED NOVEMBER 2026"
+// "Updated" comes from when GitHub last published data.json, so it changes on its own every push.
+const CREATED = 'May 2026';
 function footerDate() {
-  const el = document.getElementById('footer-date');
-  if (el) el.textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+  const els = document.querySelectorAll('.footer-date');
+  if (!els.length) return;
+  const show = d => {
+    const updated = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    els.forEach(el => el.textContent = `Created ${CREATED} \u22C5 Updated ${updated}`.toUpperCase());
+  };
+  fetch('data.json', { method: 'HEAD', cache: 'no-store' })
+    .then(r => {
+      const lm = r.headers.get('Last-Modified');
+      show(lm ? new Date(lm) : new Date(document.lastModified));
+    })
+    .catch(() => show(new Date(document.lastModified)));
 }

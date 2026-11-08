@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impel // Impact Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="entering">
+<a class="back-link" href="index.html">&larr; All folders</a>
+<div class="header" style="margin-top:1.25rem">
+  <div>
+    <div class="label">The Impact Log // Folder</div>
+    <h1 id="folder-title">Loading…</h1>
+  </div>
+</div>
+<div class="totals-bar">
+  <div class="total-card"><div class="tl">Entries</div><div class="tv" id="stat-projects">0</div></div>
+  <div class="total-card"><div class="tl">Records touched</div><div class="tv" id="stat-records">0</div></div>
+  <div class="total-card"><div class="tl">Completed</div><div class="tv" id="stat-done">0</div></div>
+</div>
+<div id="content"></div>
+<div class="footer">
+  <span>ALEX PATTI // IMPEL AI</span>
+  <span id="footer-date"></span>
+</div>
+<script src="common.js"></script>
+<script>
+const key = new URLSearchParams(location.search).get('c');
+const cat = CATEGORIES[key];
+
+function field(label, val, hl) {
+  if (!val) return '';
+  return `<div class="field"><div class="field-label">${label}</div>
+          <div class="field-val${hl ? ' highlight' : ''}">${escHtml(val)}</div></div>`;
+}
+function projectCard(e) {
+  return `<div class="entry">
+    <div class="entry-head">
+      <div><div class="entry-name">${escHtml(e.name)}</div><div class="entry-date">${escHtml(e.date)}</div></div>
+      <span class="status-badge ${e.status === 'complete' ? 'status-complete' : 'status-wip'}">${escHtml(e.status)}</span>
+    </div>
+    ${field('Volume', e.volume, true)}
+    ${field('Root cause', e.cause)}
+    ${field('Downstream consequence', e.consequence)}
+  </div>`;
+}
+function deliverableCard(e) {
+  return `<div class="entry">
+    <div class="entry-head">
+      <div><div class="entry-name">${escHtml(e.name)}</div><div class="entry-date">${escHtml(e.date)}</div></div>
+      <span class="status-badge status-complete">deliverable</span>
+    </div>
+    ${field('Audience', e.audience)}
+    ${field('Summary', e.summary, true)}
+    ${field('Context', e.context)}
+  </div>`;
+}
+
+if (!cat) {
+  document.getElementById('folder-title').textContent = 'Folder not found';
+} else {
+  document.getElementById('folder-title').textContent = cat.name;
+  document.title = 'Impact Log // ' + cat.name;
+  loadData().then(items => {
+    const inCat = items.filter(i => i.category === key);
+    const projects = inCat.filter(i => i.kind !== 'deliverable').reverse();
+    const delivs = inCat.filter(i => i.kind === 'deliverable');
+    document.getElementById('stat-projects').textContent = inCat.length;
+    document.getElementById('stat-done').textContent = inCat.filter(i => i.kind === 'deliverable' || i.status === 'complete').length;
+    document.getElementById('stat-records').textContent =
+      projects.reduce((s, p) => s + (typeof p.records === 'number' ? p.records : 0), 0).toLocaleString();
+
+    let html = '';
+    if (projects.length) html += `<div class="section-title">Projects</div><div class="entries-grid">${projects.map(projectCard).join('')}</div>`;
+    if (delivs.length) html += `<div class="section-title">Leadership deliverables</div><div class="entries-grid">${delivs.map(deliverableCard).join('')}</div>`;
+    if (!html) html = '<div class="empty-state">Nothing in this folder yet</div>';
+    document.getElementById('content').innerHTML = html;
+    footerDate();
+  });
+}
+</script>
+</body>
+</html>

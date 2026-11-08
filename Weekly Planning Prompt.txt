@@ -1,0 +1,21 @@
+I’m doing my weekly planning checkpoint.
+
+Review everything we discussed during the past week, from Sunday, ______ through Sunday, ______, 2026. Focus only on information from our actual conversations. Do not invent details or give generic productivity advice.
+
+Create a concise handoff containing:
+
+What happened this week: Important work completed, decisions made, progress, problems, lessons, and changes in direction.
+
+Open loops: Anything unfinished, waiting on someone, unresolved, or that I said I would return to.
+
+Current projects: The status of each active project, what was most recently completed, and the clearest next action.
+
+Commitments and deadlines: Classes, work tasks, appointments, emails, administrative issues, or personal commitments that may matter during the coming week.
+
+Patterns you noticed: Where I made progress, got stuck, overcomplicated things, avoided something, or repeatedly returned to the same concern.
+
+Recommended priorities: Suggest the three to five most important outcomes for the coming week. Separate things that genuinely matter from things that merely feel interesting or urgent.
+
+End with a section called “Context to give my planning AI.” Write a dense but readable summary that I can paste into another AI. Include concrete names, dates, project status, decisions, unresolved issues, and next actions.
+
+Be direct. Flag uncertainty clearly. Do not create a detailed daily schedule because another AI will combine this report with reports from my other conversations.

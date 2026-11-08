@@ -8,7 +8,8 @@
       "records": 1241,
       "volume": "~42,000-row SF export reviewed; 1,089 specialty accounts corrected; 152 net-new accounts identified and added",
       "cause": "Account Type and Sub-Type fields blank or incorrect post-Salesforce migration. No validation enforced at record creation, so RV, Marine, Equipment, Power Sports, and Commercial accounts were lumped under wrong types or missing type entirely. Required manual keyword filtering, false-positive review, and brand-matching across five category tabs.",
-      "consequence": "Account type drives territory reporting, sales segmentation, OEM program filtering, and the customer cube. Every specialty account with a bad type corrupted any report or KPI built on top of it — including MRR by segment, OEM program eligibility, and any specialty-segment performance tracking."
+      "consequence": "Account type drives territory reporting, sales segmentation, OEM program filtering, and the customer cube. Every specialty account with a bad type corrupted any report or KPI built on top of it — including MRR by segment, OEM program eligibility, and any specialty-segment performance tracking.",
+      "category": "data-ops"
     },
     {
       "id": "proj-002",
@@ -18,7 +19,8 @@
       "records": 25726,
       "volume": "25,726 Account records updated to Type=Dealership via Python/Selenium automation; 69 records required manual intervention due to validation errors; project complete",
       "cause": "Account Type field missing or unset for the dealership segment post-migration. No automated enforcement at entry means records accumulated in an undefined state, blocking any type-based filtering or reporting on the core customer segment.",
-      "consequence": "Dealership accounts are the primary customer universe. Blank type data means segment-level reporting, renewal forecasting, and OEM filtering on the dealership base all return unreliable results. Cascades to the customer cube and revenue guidance model."
+      "consequence": "Dealership accounts are the primary customer universe. Blank type data means segment-level reporting, renewal forecasting, and OEM filtering on the dealership base all return unreliable results. Cascades to the customer cube and revenue guidance model.",
+      "category": "data-ops"
     },
     {
       "id": "proj-003",
@@ -28,7 +30,8 @@
       "records": 732,
       "volume": "732 priority rows reviewed (active Sales AI assets with blank Contract Term and populated Lifecycle End Date); 300 filled with no conflicts, 15 conflicts flagged against Sage data, 415 deferred to Spence's Data Loader upload",
       "cause": "Contract Term field blank for active assets — not carried over during Salesforce migration. Sage Intacct billing records contain the data but it was not mapped or backfilled, leaving a gap between what billing knows and what SF shows. Some records resolving via Sage report; others require manual PDF contract lookup.",
-      "consequence": "Contract Term feeds renewal forecasting, churn risk identification, and lifecycle management. Without it, Impel cannot accurately predict when contracts roll off or flag at-risk renewals — directly undermining the retention-focused GRR/NRR tracking Elizabeth and Andy prioritize."
+      "consequence": "Contract Term feeds renewal forecasting, churn risk identification, and lifecycle management. Without it, Impel cannot accurately predict when contracts roll off or flag at-risk renewals — directly undermining the retention-focused GRR/NRR tracking Elizabeth and Andy prioritize.",
+      "category": "data-ops"
     },
     {
       "id": "proj-004",
@@ -38,7 +41,8 @@
       "records": 51,
       "volume": "51 asset records reviewed; Rooftop field populated on the majority; flagged group-level accounts, one auction, and one ambiguous entry for Elizabeth to handle separately",
       "cause": "Rooftop field blank on a subset of assets post-migration. When assets lack a rooftop, Elizabeth's customer cube report cannot pull the account ID, breaking downstream field population for the entire record.",
-      "consequence": "Without a rooftop, assets surface in Elizabeth's reporting with missing account data, corrupting MRR segmentation and any account-level analysis built on top of the customer cube. Fix enables Elizabeth to rerun reporting and auto-populate the remaining blank fields via the rooftop waterfall."
+      "consequence": "Without a rooftop, assets surface in Elizabeth's reporting with missing account data, corrupting MRR segmentation and any account-level analysis built on top of the customer cube. Fix enables Elizabeth to rerun reporting and auto-populate the remaining blank fields via the rooftop waterfall.",
+      "category": "data-ops"
     },
     {
       "id": "proj-005",
@@ -48,7 +52,8 @@
       "records": 21,
       "volume": "21 rooftops across 3 PODs (Pod 1: one group principal, Pod 2: a second group principal, Pod 3: a third group principal); 3 accounts flagged as not found in SF (three individual dealerships); 1 structural discrepancy flagged (one dealership listed as one row on the sheet but exists as two separate SF accounts)",
       "cause": "Parent Account field on rooftop-level accounts pointed directly to the top-level dealer group account instead of the correct POD-level intermediary account, or was left blank post-migration. The three-tier hierarchy (Rooftop > POD > Dealer Group) was collapsed to two tiers for affected records.",
-      "consequence": "Without the correct POD-level parent, account hierarchy reporting breaks and any segmentation or rollup filtering built on the POD structure returns incorrect results. Ultimate Parent Account auto-populates correctly only once the POD intermediary is set, so dirty parent data cascades up through the entire dealer group hierarchy in SF."
+      "consequence": "Without the correct POD-level parent, account hierarchy reporting breaks and any segmentation or rollup filtering built on the POD structure returns incorrect results. Ultimate Parent Account auto-populates correctly only once the POD intermediary is set, so dirty parent data cascades up through the entire dealer group hierarchy in SF.",
+      "category": "data-ops"
     },
     {
       "id": "proj-006",
@@ -58,7 +63,8 @@
       "records": 6000,
       "volume": "~5,965 blank rooftop accounts set to Type=Dealership; 37 Parent accounts manually reviewed and categorized as Dealership, Dealership Group, or flagged as outliers; 12 ambiguous non-dealership accounts (a software vendor, an international OEM distributor, an RV dealer, etc.) isolated in a separate tab for Luke to resolve",
       "cause": "Account Type field blank on ~6,000 rooftop and parent-level records not captured by the prior bulk script run -- primarily international accounts (Australia, UK, Canada, Mexico, Middle East) outside the original domestic scope, plus parent-level accounts requiring judgment calls on entity type.",
-      "consequence": "Blank Type fields on rooftop accounts break segment-level reporting, OEM filtering, and any revenue analysis built on account type. Parent accounts miscategorized as generic \"Parent\" rather than Dealership Group corrupt hierarchy rollups and territory reporting across all child accounts."
+      "consequence": "Blank Type fields on rooftop accounts break segment-level reporting, OEM filtering, and any revenue analysis built on account type. Parent accounts miscategorized as generic \"Parent\" rather than Dealership Group corrupt hierarchy rollups and territory reporting across all child accounts.",
+      "category": "data-ops"
     },
     {
       "id": "proj-007",
@@ -68,7 +74,8 @@
       "records": 1222,
       "volume": "2,281 filtered dealership accounts reviewed (from 5,235 total missing Billing Street); 378 verified addresses found at High or Medium confidence via Claude-assisted batch research; 844 additional accounts flagged across four categories: non-dealerships miscategorized as Dealership type (~208), international accounts with Billing Country incorrectly set to United States (~604 — Canadian, UK, Irish, Brazilian, Australian, and other foreign dealerships), test/placeholder records (39), and confirmed dead or closed accounts (21)",
       "cause": "Billing Street field blank across 5,235 accounts post-migration. Majority owned by Data Migration user with no address data attached at import. Active rep-owned dealership accounts also affected, meaning billing records lacked physical location data for a significant portion of the active customer base. Underlying issues compounded by non-dealership entities and international accounts miscategorized as Dealership type with incorrect country fields.",
-      "consequence": "Missing billing addresses create gaps in invoice delivery accuracy and downstream billing system integrity. Wrong country fields on hundreds of international accounts (Canadian, Australian, Brazilian, Irish, and UK dealerships all marked as United States) risk misdirected billing and corrupt geographic segmentation in reporting. Non-dealerships and test records inflating the Dealership segment undermine any count-based reporting or quota modeling built on account type."
+      "consequence": "Missing billing addresses create gaps in invoice delivery accuracy and downstream billing system integrity. Wrong country fields on hundreds of international accounts (Canadian, Australian, Brazilian, Irish, and UK dealerships all marked as United States) risk misdirected billing and corrupt geographic segmentation in reporting. Non-dealerships and test records inflating the Dealership segment undermine any count-based reporting or quota modeling built on account type.",
+      "category": "data-ops"
     },
     {
       "id": "proj-008",
@@ -78,7 +85,8 @@
       "records": 88,
       "volume": "103 US accounts with blank Billing State reviewed from Elizabeth's filtered asset report; 30 high-confidence records resolved in initial pass; second pass via Google Places API on 75 remaining rooftops returned 71 matches; 58 verified US states staged for Data Loader upload after removing 13 invalid/international results (Mexico, Canada, Brazil, Germany, Estonia, Italy, Saipan); file handed to Luke for import. Remaining accounts excluded: international entities with no applicable US state.",
       "cause": "Billing State field blank on asset-linked account records. Missing address data at migration — accounts imported without geographic fields populated, leaving state blank across a subset of the active account base.",
-      "consequence": "Missing billing state breaks US territory assignment and geographic segmentation for affected accounts. Blank state on records tied to Elizabeth's customer cube causes those accounts to surface without location context, corrupting any region-based MRR or performance analysis."
+      "consequence": "Missing billing state breaks US territory assignment and geographic segmentation for affected accounts. Blank state on records tied to Elizabeth's customer cube causes those accounts to surface without location context, corrupting any region-based MRR or performance analysis.",
+      "category": "data-ops"
     },
     {
       "id": "proj-009",
@@ -88,7 +96,8 @@
       "records": 1775,
       "volume": "4,434 accounts in SF missing Billing Street; 1,347 excluded pre-API (409 non-US, 938 non-Rooftop); 3,087 Rooftop US accounts processed across 3 API runs; 1,775 verified addresses confirmed and staged for SF import; 651 accounts flagged to Needs Review (large dealer groups or ambiguous multi-location matches); 661 accounts returned no usable result",
       "cause": "Billing Street field blank across thousands of rooftop accounts post-migration. Data Migration user import carried no physical address data. Manual research (proj-007) addressed a subset; remaining volume required automation to be viable at scale.",
-      "consequence": "Missing billing addresses break invoice delivery accuracy and downstream billing system integrity. Automating the lookup via Google Places API with phone-number anchoring, website domain matching, and rooftop count signals recovered 1,775 addresses in a single session — establishing a repeatable method for future address hygiene passes. Also surfaced ~938 non-Rooftop accounts miscategorized as Rooftop in SF, inflating the rooftop count and flagged as a separate cleanup item for Luke."
+      "consequence": "Missing billing addresses break invoice delivery accuracy and downstream billing system integrity. Automating the lookup via Google Places API with phone-number anchoring, website domain matching, and rooftop count signals recovered 1,775 addresses in a single session — establishing a repeatable method for future address hygiene passes. Also surfaced ~938 non-Rooftop accounts miscategorized as Rooftop in SF, inflating the rooftop count and flagged as a separate cleanup item for Luke.",
+      "category": "data-ops"
     },
     {
       "id": "proj-010",
@@ -98,7 +107,8 @@
       "records": null,
       "volume": "~10,000 asset records with blank Purchase Date reviewed (4,793 of which are Active, not Cancelled); traced individual records (one dealership, one dealer group) through Subscription → Contract → Opportunity chain per Stephen's documented method; attempted bulk Salesforce report cross-reference against full blank population to estimate recoverable volume",
       "cause": "Pre-CPQ-migration assets retain only a Renewal Opportunity link post-migration — the original Opportunity does not survive the Outsell-to-CPQ transition, so no purchase date exists to recover for those records. Confirmed at the individual-record level via manual trace and at the bulk level: account and product naming conventions don't reconcile cleanly between legacy Outsell and current CPQ systems, making automated matching unreliable across the full population.",
-      "consequence": "Structural data gap from the 2024 CPQ migration affecting revenue/reporting completeness on a meaningful share of active assets — not a data-entry oversight, and not resolvable through standard bulk remediation. Findings documented and delivered to Luke for leadership; recommendation is to treat this as closed rather than pursue bulk recovery, given the cost-to-confidence ratio of manual tracing. One-off accounts can still be traced case by case if a contractual or legal need arises."
+      "consequence": "Structural data gap from the 2024 CPQ migration affecting revenue/reporting completeness on a meaningful share of active assets — not a data-entry oversight, and not resolvable through standard bulk remediation. Findings documented and delivered to Luke for leadership; recommendation is to treat this as closed rather than pursue bulk recovery, given the cost-to-confidence ratio of manual tracing. One-off accounts can still be traced case by case if a contractual or legal need arises.",
+      "category": "data-ops"
     },
     {
       "id": "proj-011",
@@ -108,7 +118,8 @@
       "records": 23,
       "volume": "209 pending AIVA order products reviewed (Onboarding Status = Pending) via custom Order Products report; none fell below the $1k threshold on Net Unit Price or MRR; 23 records identified with a consistent $200/month gap between Net Unit Price ($1,000) and MRR ($1,200)",
       "cause": "Traced one flagged record (one dealership) to its full Order Product detail. MRR calculated off List/Unit Price (gross, pre-discount), while Net Unit Price correctly reflected the post-discount amount. No 'Net MRR' field exists on the Order Product object, so any discounted AIVA deal showed this same gap by design, not as a data entry error.",
-      "consequence": "Any reporting or forecasting built on MRR was using gross revenue, not actual net recurring revenue, on discounted accounts. Confirmed with Luke; both Net Unit Price and MRR set to 1,000 to match the existing correct value across all 23 records, staged with Order Product IDs and handed off for Data Loader upload."
+      "consequence": "Any reporting or forecasting built on MRR was using gross revenue, not actual net recurring revenue, on discounted accounts. Confirmed with Luke; both Net Unit Price and MRR set to 1,000 to match the existing correct value across all 23 records, staged with Order Product IDs and handed off for Data Loader upload.",
+      "category": "data-ops"
     },
     {
       "id": "proj-012",
@@ -118,7 +129,8 @@
       "records": 4,
       "volume": "1,627 active Service AI 1.0/2.0 asset rows audited via Salesforce report; grouped by Account and Rooftop to isolate true overlaps from normal multi-rooftop accounts running different product versions; 4 rooftops identified with both products active simultaneously (four individual dealerships); new Lifecycle End Date calculated as one day prior to each account's Service AI 2.0 start date; staged with Asset IDs and handed to Luke for Data Loader upload after discovering Lifecycle End Date is a Data Loader-only field (no manual edit path; the field visible on the record page is a separate read-only formula field with the same label)",
       "cause": "No automation existed to deactivate Service AI 1.0 assets upon Service AI 2.0 onboarding for legacy accounts, leaving both products active simultaneously. One dealership's overlap had gone undetected long enough that its corrected end date lands in the past, flagged separately to Luke for review before load.",
-      "consequence": "Overlapping active assets distort MRR and billing accuracy for the affected accounts and obscure true product adoption state. Fix also surfaced a page layout gap (the writable Lifecycle End Date field isn't exposed anywhere in the standard UI), worth flagging for a layout fix so this doesn't recur as a blocker on future cleanup work."
+      "consequence": "Overlapping active assets distort MRR and billing accuracy for the affected accounts and obscure true product adoption state. Fix also surfaced a page layout gap (the writable Lifecycle End Date field isn't exposed anywhere in the standard UI), worth flagging for a layout fix so this doesn't recur as a blocker on future cleanup work.",
+      "category": "data-ops"
     },
     {
       "id": "proj-013",
@@ -128,7 +140,8 @@
       "records": 205,
       "volume": "205 AIVA backlog Order Product records restated from Net Unit Price $1,200 to $1,000 per renegotiated rate; filtered report built with Luke on Order Products, exported to CSV, updated via Data Loader.io mapped on Order Product ID",
       "cause": "Austin negotiated a new AIVA rate ($1,200 to $1,000) but the backlog of existing Order Product records still reflected the old rate. Luke walked through the correct field to update in person: Net Unit Price only, not the Quote Line Item MRR or Gross Activation MRR fields initially flagged, since those roll up from Net Unit Price and the converted currency field is a runtime formula that can't be mapped in Data Loader.",
-      "consequence": "Unrestated records would continue billing/reporting at the old rate despite the renegotiated terms, understating the rate change across the full AIVA backlog. Correction via Data Loader on Order Product ID keeps MRR (converted) and Net Unit Price aligned at the new rate going forward."
+      "consequence": "Unrestated records would continue billing/reporting at the old rate despite the renegotiated terms, understating the rate change across the full AIVA backlog. Correction via Data Loader on Order Product ID keeps MRR (converted) and Net Unit Price aligned at the new rate going forward.",
+      "category": "data-ops"
     },
     {
       "id": "proj-014",
@@ -138,7 +151,8 @@
       "records": 2320,
       "volume": "2,320 active assets flagged on rooftop accounts not showing Active status, via Accounts with Assets - Custom report built with Luke at the rooftop level (not OEM level). Broken down as 2,152 Prospect, 100 Implementation, 68 Cancelled.",
       "cause": "Asset Status and Account Status are not automatically kept in sync, active assets can persist on accounts that have moved to Prospect, Implementation, or Cancelled at the rooftop level with no automated flag or reconciliation step.",
-      "consequence": "Active assets tied to Cancelled accounts represent live billing/service exposure on terminated relationships. All 68 Cancelled-account assets were resolved directly. Report set to weekly Friday delivery to catch new instances going forward."
+      "consequence": "Active assets tied to Cancelled accounts represent live billing/service exposure on terminated relationships. All 68 Cancelled-account assets were resolved directly. Report set to weekly Friday delivery to catch new instances going forward.",
+      "category": "data-ops"
     },
     {
       "id": "proj-015",
@@ -148,7 +162,8 @@
       "records": null,
       "volume": "Identified bundles where some component Order Products show Onboarding Status = Complete while others remain Pending, built via Excel-based conflict detection pipeline (COUNTIFS per unique Order Number) with color-coded output by rooftop.",
       "cause": "Assets and billing for a bundle only trigger once every component Order Product in the bundle reaches Complete status; partial completion silently blocks the bundle from ever generating an asset with no visible flag in Salesforce report builder, which can't natively isolate mixed-status groups.",
-      "consequence": "Bundles stuck in partial completion delay both asset creation and billing indefinitely with no native alert. Pipeline delivered to Andy to identify and unblock affected bundles."
+      "consequence": "Bundles stuck in partial completion delay both asset creation and billing indefinitely with no native alert. Pipeline delivered to Andy to identify and unblock affected bundles.",
+      "category": "data-ops"
     },
     {
       "id": "proj-016",
@@ -158,7 +173,8 @@
       "records": 8038,
       "volume": "Phase 1: 67,079-row Account Relationship export reviewed with Katherine; 6,838 records kept, 1,300 flagged for deletion, 9 flagged for review. Phase 2: active/implementation rooftop accounts with Sync to IDP = False reviewed against Luke's retention rules; 723 rows flagged for brand corrections plus 26 OEM mismatch records isolated for Luke's review. Both phases handed off.",
       "cause": "Duplicate Account Relationship records and misaligned Related Brand/OEM fields accumulated with no dedup or validation pass since migration, driven by inconsistent MSA Pricing values, blank OEM fields resolved only by sibling-record inference, and no enforced rule preventing duplicate Account+OEM pairs from being created.",
-      "consequence": "Duplicate and misaligned relationship records inflate rooftop counts, distort OEM-level segmentation, and corrupt any account hierarchy or brand-based reporting built on Account Relationship data. Clean-up restores accuracy to relationship-based rollups; 26 OEM mismatches and Data Loader execution still pending Luke's confirmation."
+      "consequence": "Duplicate and misaligned relationship records inflate rooftop counts, distort OEM-level segmentation, and corrupt any account hierarchy or brand-based reporting built on Account Relationship data. Clean-up restores accuracy to relationship-based rollups; 26 OEM mismatches and Data Loader execution still pending Luke's confirmation.",
+      "category": "data-ops"
     },
     {
       "id": "proj-017",
@@ -168,7 +184,8 @@
       "records": 274,
       "volume": "274 former Toma competitor rooftops reviewed with Katherine; Salesforce data (Account ID, Status, Active/Inactive Assets, Pending Order Products, MRR) populated across columns L-Q in shared Google Sheet; Active Assets Names column added for upsell context; follow-up pass matched 3 additional pending/implementation accounts (three individual dealerships). Delivered to Danny for outreach.",
       "cause": "No existing view combined competitor-displaced accounts with current Salesforce status, active product footprint, and pending orders, so sales had no way to prioritize or contextualize outreach to former Toma clients without manual account-by-account lookup.",
-      "consequence": "Sales now has a single reference sheet showing account status, live assets, and pending orders across all 274 rooftops, enabling targeted upsell/cross-sell outreach instead of blind competitor conquest contact."
+      "consequence": "Sales now has a single reference sheet showing account status, live assets, and pending orders across all 274 rooftops, enabling targeted upsell/cross-sell outreach instead of blind competitor conquest contact.",
+      "category": "data-ops"
     },
     {
       "id": "proj-018",
@@ -178,7 +195,8 @@
       "records": 1399,
       "volume": "3,328-row Order Product export reviewed (Onboarding Status = Complete, bundle children excluded); filtered out $0 total price and 1-month trial/promotional records; 1,399 records across 790 unique accounts confirmed as Complete with no corresponding asset created. Manual sampling of 10 records identified two failure sub-patterns. Documented in Obsidian and flagged to Salman for debugging.",
       "cause": "Asset creation automation does not reliably trigger on Onboarding Status transitioning to Complete. Sampling showed both clean records with well-documented Pending-to-Complete transitions and no asset (trigger failure), and records with no logged status-change event or mismatched Onboarding Process fields (possible integrity or bypass issue).",
-      "consequence": "790 accounts have completed onboarding with no corresponding asset, meaning no billing, no MRR attribution, and no product-adoption visibility for real, live implementations. Treated as a broken automation trigger rather than a leadership decision, so it sits outside the Pre-Decision Impact Mapping thesis as a sibling structural finding; Salman is debugging the root cause."
+      "consequence": "790 accounts have completed onboarding with no corresponding asset, meaning no billing, no MRR attribution, and no product-adoption visibility for real, live implementations. Treated as a broken automation trigger rather than a leadership decision, so it sits outside the Pre-Decision Impact Mapping thesis as a sibling structural finding; Salman is debugging the root cause.",
+      "category": "data-ops"
     },
     {
       "id": "proj-019",
@@ -188,7 +206,8 @@
       "records": 66,
       "volume": "Built and validated with Benjy via SOQL workaround (Salesforce report UI editing blocked by org security policy). Filters: Account Status = Permanently Closed or Cancelled, Onboarding Status = Complete as active proxy, Order Product End Date excluded only if in the past. Returned 11 unique accounts and 66 active order products, matching prior week's manual count.",
       "cause": "No automated alert existed to flag active, billable order products still sitting on canceled or permanently closed accounts, leaving this exposure discoverable only through ad hoc manual pulls.",
-      "consequence": "Validated build gives Sales Ops a repeatable, scheduled check for live billing/service exposure on terminated accounts. Also surfaced a secondary data gap: all 11 accounts returned as Cancelled with zero Permanently Closed matches, flagged to Benjy. Presented at the 7/21 scoping session to define the next 1-2 Gumloop automation targets."
+      "consequence": "Validated build gives Sales Ops a repeatable, scheduled check for live billing/service exposure on terminated accounts. Also surfaced a secondary data gap: all 11 accounts returned as Cancelled with zero Permanently Closed matches, flagged to Benjy. Presented at the 7/21 scoping session to define the next 1-2 Gumloop automation targets.",
+      "category": "automation"
     },
     {
       "id": "proj-020",
@@ -198,7 +217,8 @@
       "records": 20,
       "volume": "Gumloop SOQL pull on Sales_Segment_Override__c = true returned 20 accounts; 19 belong to two dealer groups (one group: 8, the other: 10), plus one vendor account as a standalone. Finding shared with Luke to confirm whether segment classifications are still accurate.",
       "cause": "The override flag unlocks manual editing of the Sales Segment field rather than flagging an anomaly, so accounts can retain a manually-set segment indefinitely without revalidation against current account state.",
-      "consequence": "Concentration in two dealer groups raises the question of whether their segment classification still reflects reality or is stale from a past manual override. Awaiting Luke's read on whether this becomes a formal reclassification pass."
+      "consequence": "Concentration in two dealer groups raises the question of whether their segment classification still reflects reality or is stale from a past manual override. Awaiting Luke's read on whether this becomes a formal reclassification pass.",
+      "category": "data-ops"
     },
     {
       "id": "proj-021",
@@ -208,7 +228,8 @@
       "records": 1046,
       "volume": "Luke requested a list of Account Status = Implementation accounts (Record Type = Rooftop and Non-Dealership) carrying zero Order Products. Built subtractively: List A of 1,046 Implementation accounts anti-joined against List B of 51,267 unique account IDs with at least one Order Product. Result was zero gap accounts; every account in scope already had Order Product coverage. Finding reported back to Luke verbally.",
       "cause": "The 'Accounts With Order Products - CUSTOM' report type is an inner join, so it structurally cannot surface accounts with zero related Order Products. Third confirmed instance of an inner-join report type blocking a 'show me what's missing' query, alongside the Order Product to Asset join gap.",
-      "consequence": "Negative finding: no data integrity issue exists in this population, which closes the question rather than opening a cleanup. The real takeaway is structural, not data-level. Answering absence questions currently requires two exports and a manual anti-join every time, which is a repeatable cost until a custom report type or cross filter approach is standardized."
+      "consequence": "Negative finding: no data integrity issue exists in this population, which closes the question rather than opening a cleanup. The real takeaway is structural, not data-level. Answering absence questions currently requires two exports and a manual anti-join every time, which is a repeatable cost until a custom report type or cross filter approach is standardized.",
+      "category": "data-ops"
     },
     {
       "id": "proj-022",
@@ -218,7 +239,8 @@
       "records": 117,
       "volume": "Ad hoc request from Luke for active assets carrying a Lifecycle Start Date but no Active Date. Reopened the 7/16 report (118 records at the time), found it filtered only on Status = Active and Active Date = blank without enforcing Lifecycle Start Date populated. Added the missing filter, trimmed columns to Asset Name, Account Name, Status, Lifecycle Start Date, Active Date. Final count 117.",
       "cause": "Active Date is not enforced as a required field when an asset transitions to Active status, so assets can go live with a lifecycle start recorded but no active date, leaving the two lifecycle fields out of sync.",
-      "consequence": "Any tenure, time-to-activation, or lifecycle-duration calculation built on Active Date silently drops or misdates these 117 assets. Verifying the prior report's filters rather than resending the old number caught a genuine scope mismatch against what Luke actually asked for."
+      "consequence": "Any tenure, time-to-activation, or lifecycle-duration calculation built on Active Date silently drops or misdates these 117 assets. Verifying the prior report's filters rather than resending the old number caught a genuine scope mismatch against what Luke actually asked for.",
+      "category": "data-ops"
     },
     {
       "id": "proj-023",
@@ -228,7 +250,8 @@
       "records": 53,
       "volume": "Andy requested a rerun of the 7/13 conflict report. No saved source export existed, so the Salesforce report was rebuilt from scratch on 'Order Products - Custom' and the conflict detection pipeline rerun. Result: 16 conflicting orders across 53 rows, 25 line items still Pending. Added a derived Brand column (Ford, GM, Honda, Kia, one dealer group) at Andy's request, then a second pass adding MRR and NUP, quantifying $24,096.54 pending MRR and $26,274.50 pending NUP.",
       "cause": "Same root cause as proj-015: bundles only generate assets and billing once every component Order Product reaches Complete, and Salesforce cannot natively isolate mixed-status groups. The rerun exposed a second-order problem, that no source export or saved report from the original run was retained, forcing a full rebuild.",
-      "consequence": "Roughly $24k in monthly recurring revenue is sitting unbilled behind partially-completed bundles with no native alert. Quantifying the dollar exposure rather than just the record count changed how the finding lands with a stakeholder. Standing lesson: save the Salesforce report object, not just the export, or every rerun is a rebuild."
+      "consequence": "Roughly $24k in monthly recurring revenue is sitting unbilled behind partially-completed bundles with no native alert. Quantifying the dollar exposure rather than just the record count changed how the finding lands with a stakeholder. Standing lesson: save the Salesforce report object, not just the export, or every rerun is a rebuild.",
+      "category": "data-ops"
     },
     {
       "id": "proj-024",
@@ -238,7 +261,8 @@
       "records": 259,
       "volume": "Three gap reports requested by Austin and Kyle via Art: one dealer group's dealers with 360 WalkArounds but no Feature Tour Merchandising (94 accounts), the same dealer group with 360 but no AI Virtual Booth (165 accounts), and all SMB dealers (Acquisition + Expansion) with 360 but no Feature Tour. First pass delivered as CSVs built through a pandas pivot/flag approach; Kyle then asked for native Salesforce reports, prompting a full rebuild using Cross Filters (Accounts WITH Assets / Accounts WITHOUT Assets). All three saved and links shared in a Slack group with Austin, Kyle, and Luke.",
       "cause": "Salesforce cannot perform 'has asset A but not asset B' logic in a standard single-pass report; Cross Filters are the correct native mechanism and were not being used. Field discovery also surfaced that the dealer group is not a Sales Segment value at all, it is a parent-child account structure, so the correct filter is Parent Account Name contains the group's name. Two Feature Tour asset name variants exist in the data, which a naive exact match would have missed.",
-      "consequence": "Cross-sell targets for the 360 install base are now standing, self-refreshing Salesforce reports rather than one-time CSVs that go stale the day they are sent. A near-miss was caught in review: report 3 had been duplicated from the Virtual Booth version and still carried the wrong cross filter."
+      "consequence": "Cross-sell targets for the 360 install base are now standing, self-refreshing Salesforce reports rather than one-time CSVs that go stale the day they are sent. A near-miss was caught in review: report 3 had been duplicated from the Virtual Booth version and still carried the wrong cross filter.",
+      "category": "data-ops"
     },
     {
       "id": "proj-025",
@@ -248,7 +272,8 @@
       "records": 22,
       "volume": "Luke relayed a request from Spence testing the hypothesis that some Order Products without assets had slipped through without a rooftop assignment. Built 'Assets Without Rooftop - Custom' on the Accounts with Assets report type with a null filter on Rooftop, trimmed to relevant columns. Returned 22 records. Report link and count sent back to Luke; Spence confirmed the result matched expectations.",
       "cause": "Rooftop is not enforced on asset creation, but the 22 records are almost entirely legacy Cancelled or Inactive assets with zero Active records, meaning this is residue from historical data rather than an active automation failure.",
-      "consequence": "Hypothesis disproven. Explicitly ruled out as supporting evidence for the Salman asset creation gap escalation, which matters because attaching an unrelated 22-record population to a 1,399-record automation failure would have weakened the escalation rather than strengthened it."
+      "consequence": "Hypothesis disproven. Explicitly ruled out as supporting evidence for the Salman asset creation gap escalation, which matters because attaching an unrelated 22-record population to a 1,399-record automation failure would have weakened the escalation rather than strengthened it.",
+      "category": "data-ops"
     },
     {
       "id": "proj-026",
@@ -258,7 +283,8 @@
       "records": null,
       "volume": "Art requested a matrix report of MRR production by rep and month, US billing only, current fiscal year. First build on 'Order Products - Custom' grouped by Account Owner failed the requirement because no Team field exists on Order Products or on 'Accounts With Order Products - CUSTOM'. Rebuilt from Austin's existing YTD Bookings by Rep Sales Scorecard on 'Opportunities with Quotes and Quote Lines', which already carries Sales Team logic, with Sales Team as the outer row group, Opportunity Owner nested, and Close Date by calendar month as columns.",
       "cause": "Sales team structure is not modeled on the Order Product or Account objects, so team-level revenue reporting is only possible on the Opportunity side. Luke confirmed a role hierarchy build in Sandbox is the real long-term fix.",
-      "consequence": "Team-level production reporting works today only by inheriting logic from one pre-existing scorecard report, which is a single point of failure. Checking whether an existing report already solves the join is faster than building the schema from scratch."
+      "consequence": "Team-level production reporting works today only by inheriting logic from one pre-existing scorecard report, which is a single point of failure. Checking whether an existing report already solves the join is faster than building the schema from scratch.",
+      "category": "data-ops"
     },
     {
       "id": "proj-027",
@@ -268,7 +294,8 @@
       "records": 43,
       "volume": "Austin requested active-asset coverage by product category for Art across 43 dealers under one OEM distributor in the distributor's dealer spreadsheet. Pulled a Salesforce export on Accounts with Assets (Account Name, Asset Name, Product Family, Status), re-pulled after finding Digital Asset Status entirely blank and the correct field being asset-level Status. Delivered 8 binary coverage columns: Chat AI, Sales AI, Service AI, AI Marketing, Ad Tech, Merchandising Hardware, Merchandising Software, Setup.",
       "cause": "Dealer names in the source file did not match Salesforce account names because of typos, dropped suffixes, and abbreviations, requiring fuzzy matching plus one manual Salesforce lookup to resolve one dealer's short name to its full Salesforce account name. AI Communications is also a single Product Family covering distinct sellable products, so sub-categorization had to be done by asset name keyword rather than by the schema.",
-      "consequence": "Head of sales now has a whitespace view of product coverage across the distributor's book. The deeper issue is that Product Family does not map cleanly to how the products are actually sold, so any product-level analysis requires manual bucketing by asset name."
+      "consequence": "Head of sales now has a whitespace view of product coverage across the distributor's book. The deeper issue is that Product Family does not map cleanly to how the products are actually sold, so any product-level analysis requires manual bucketing by asset name.",
+      "category": "data-ops"
     },
     {
       "id": "proj-028",
@@ -278,7 +305,8 @@
       "records": 1061,
       "volume": "Board-level data correction with Andy and Cecilia: identify churn records coded Internal that should have been Cancelled, and backfill a 'When should it have been cancelled?' date column. 1,061 rows deduplicated to 239 distinct Cancellation Reason Details strings, dates inferred and filled for 142 cases, 38 ambiguous cases returned grouped by failure type (vague relative time, year or quarter only, disputed dates, conflicting dates, implied but unstated). Phase 1 delivered to the Andy/Cecilia/Luke group.",
       "cause": "Cancel dates were never captured as structured data. The only record of when an account should have been cancelled lives in free-text retention case notes, so recovering the date requires parsing prose rather than querying a field. Cecilia also writes 'should have fallen off' language in the Notes field, not only in Description, so the first pass missed a source column entirely until Andy added a vlookup at column AJ.",
-      "consequence": "Miscoded Internal churn understates true cancellation volume in board reporting. 142 of 239 distinct cases recovered on the first pass; second pass pending against the newly populated Notes column plus whatever Cecilia resolves manually. Structural point: this is a field-capture failure, not a data entry failure, and it will recur until a cancel date is required at case close."
+      "consequence": "Miscoded Internal churn understates true cancellation volume in board reporting. 142 of 239 distinct cases recovered on the first pass; second pass pending against the newly populated Notes column plus whatever Cecilia resolves manually. Structural point: this is a field-capture failure, not a data entry failure, and it will recur until a cancel date is required at case close.",
+      "category": "data-ops"
     },
     {
       "id": "proj-029",
@@ -288,7 +316,8 @@
       "records": 269,
       "volume": "Luke requested two reports: a cohort of Active Accounts with Service AI 2.0 Active and Service AI 1.0 Inactive/Cancelled, and an Asset-level MRR/Net Unit Price comparison between the two versions grouped by Rooftop. Cohort returned 269 accounts. Built on 'Accounts with Assets' (standard) with two stacked cross filters. Flagged to Luke: a handful of cohort accounts missing a paired 2.0 asset row, and 7 accounts running both 1.0 and 2.0 active simultaneously, separate from the cohort.",
       "cause": "Base Account filter initially used the wrong Status field (returned one account) before correcting to Account Status. Product cross filters required exact full product names, not shorthand. Rooftop field for the Asset-level report lives under Asset: Custom Info, not the Account level.",
-      "consequence": "Gives Luke a clean before/after MRR picture of the 1.0-to-2.0 migration by rooftop. The dual-active-version finding (7 accounts) surfaced a live billing overlap distinct from the cohort scope, and the missing-paired-asset accounts flag a possible migration gap worth a follow-up look."
+      "consequence": "Gives Luke a clean before/after MRR picture of the 1.0-to-2.0 migration by rooftop. The dual-active-version finding (7 accounts) surfaced a live billing overlap distinct from the cohort scope, and the missing-paired-asset accounts flag a possible migration gap worth a follow-up look.",
+      "category": "data-ops"
     },
     {
       "id": "proj-030",
@@ -298,7 +327,8 @@
       "records": 324,
       "volume": "Order Products filtered to Onboarding Status = Pending, Order Quote Journey = MSA-OEM, Subscription Term not blank. Exported with Order Product ID, built a two-column CSV (ID + blank Subscription Term), updated via dataloader.io against OrderItem. First run failed with 324 errors because Quote Journey, though unchanged, is a restricted picklist rejected at the API level when mapped. Removing it from the field mapping fixed the load: 324 successes, 0 errors.",
       "cause": "dataloader.io mapping any restricted-picklist field, even one whose value isn't changing, triggers API-level validation and fails the whole row. Only the match key and the field actually being written should be mapped.",
-      "consequence": "324 stale Subscription Term values cleared on pending MSA-OEM orders per Luke's request. Confirmed complete with Luke via Slack. Reusable fix for future dataloader.io jobs: unmap any field not being modified rather than assuming read-only/unchanged fields are safely ignored."
+      "consequence": "324 stale Subscription Term values cleared on pending MSA-OEM orders per Luke's request. Confirmed complete with Luke via Slack. Reusable fix for future dataloader.io jobs: unmap any field not being modified rather than assuming read-only/unchanged fields are safely ignored.",
+      "category": "data-ops"
     },
     {
       "id": "proj-031",
@@ -308,7 +338,8 @@
       "records": null,
       "volume": "Danny (via Luke) requested accounts on the AI Marketing product family with contract terms of 1, 3, or 6 months. Rebuilt from 'Assets and Intacct Contract' to 'Accounts with Assets - Custom' after discovering Danny's Sales profile had no access to the Asset object or Intacct Contract join. Saved as 'AI Marketing - 1/3/6 Month Terms' filtered on Product Family = AI Marketing, Status = Active, Contract Term = 1, 3, 6.",
       "cause": "Danny's profile lacked Asset object access entirely, not just the Intacct Contract join, so the initial report type choice was unusable for him regardless of filter correctness. Also surfaced that Contract Term (DNU) is a deprecated field distinct from the live Contract Term field.",
-      "consequence": "Danny now has a standing, access-appropriate report for short-term AI Marketing contracts without requiring a permission change. Report type choice needs to account for the requester's object access, not just report logic."
+      "consequence": "Danny now has a standing, access-appropriate report for short-term AI Marketing contracts without requiring a permission change. Report type choice needs to account for the requester's object access, not just report logic.",
+      "category": "data-ops"
     },
     {
       "id": "proj-032",
@@ -318,7 +349,8 @@
       "records": 170,
       "volume": "Luke asked for accounts carrying two Service AI 2.0 assets, one priced at $0 and one non-zero, leftover duplicates from the 1.0-to-2.0 migration flagged for deletion. Built on the standard Assets report type (Product Name = Service AI 2.0, no status filter), grouped by Rooftop rather than Account Name to catch cross-account pairs. Python analysis found 185 rooftops matching the pattern, refined to 170 clean $0/non-zero duplicates and 15 rooftops where the two asset rows sat under different account names (13 of them under one dealer group). Delivered as a two-tab Excel workbook and flagged to Luke via Slack, including that several $0 rows were still Active status, not just Cancelled/Inactive as expected.",
       "cause": "No automation deactivates or removes the $0 legacy asset row when Service AI 2.0 re-onboards under a new price, so duplicate pairs accumulate silently. Rooftop, not Account Name, is the correct grouping key since some duplicate pairs span two different account records under the same physical rooftop.",
-      "consequence": "170 clean duplicates ready for Luke's delete decision, plus a distinct 15-rooftop anomaly (account-name mismatch under one rooftop) isolated so it doesn't get bundled into the clean delete list. Active-status $0 rows in the mix mean this isn't purely inactive cleanup, some may reflect live billing confusion, which is why it was routed to Luke for a call rather than closed out unilaterally."
+      "consequence": "170 clean duplicates ready for Luke's delete decision, plus a distinct 15-rooftop anomaly (account-name mismatch under one rooftop) isolated so it doesn't get bundled into the clean delete list. Active-status $0 rows in the mix mean this isn't purely inactive cleanup, some may reflect live billing confusion, which is why it was routed to Luke for a call rather than closed out unilaterally.",
+      "category": "data-ops"
     },
     {
       "id": "proj-033",
@@ -328,7 +360,8 @@
       "records": 266,
       "volume": "Luke redirected the original $0/non-zero duplicate audit (proj-032) with a corrected filter: Migration Source Org = Outsell, Product Name = Service AI 2.0, NetUnitPrice = $0. Migration Source Org was blank across all 507 originally filtered rows, invalidating Luke's first proposed filter; rebuilt with the corrected combination returned 266 rows, mixed Active/Cancelled/Inactive status. The dealer group account-name mismatch resurfaced across multiple rooftops within the refined set (three individual dealerships) and was flagged back to Luke.",
       "cause": "Migration Source Org, the field expected to isolate legacy Outsell migration leftovers, was blank rather than populated with 'Outsell' on the first pass, so the original filter couldn't distinguish migration debris from records created post-implementation via RCA. Report also had to be rebuilt from scratch after losing all columns.",
-      "consequence": "266 confirmed Outsell-migration $0 duplicates handed back to Luke, distinct from the broader 507-row population. Active-status $0 rows still present, so this remains a detection handoff rather than a closed cleanup. Recurrence of the dealer group anomaly across a second independent filter pass strengthens it as a real pattern, not noise."
+      "consequence": "266 confirmed Outsell-migration $0 duplicates handed back to Luke, distinct from the broader 507-row population. Active-status $0 rows still present, so this remains a detection handoff rather than a closed cleanup. Recurrence of the dealer group anomaly across a second independent filter pass strengthens it as a real pattern, not noise.",
+      "category": "data-ops"
     },
     {
       "id": "proj-034",
@@ -338,7 +371,8 @@
       "records": 698,
       "volume": "Art requested (via Austin) CDJR dealer accounts carrying Chat AI without Service AI. Built on 'Accounts With Order Products - CUSTOM' with two cross filters (WITH Chat AI, WITHOUT Service AI), CDJR brand isolated via the free-text 'Rooftop: Brands' field using 'contains' with comma-separated brand values. Returned 698 order product rows across 146 unique accounts (~4.8 order products per account).",
       "cause": "CDJR brand isn't tracked at the Account level, it lives on the Rooftop object as free text, not a picklist, requiring a 'contains' operator with OR'd values instead of a clean match. 'Has A but not B' logic also isn't native to a single-pass report, requiring cross filters instead of a manual anti-join.",
-      "consequence": "Art has a standing cross-sell target list for CDJR dealers on Chat AI without Service AI. Report returns one row per order product, not per account, so a dealer with multiple rooftops shows multiple rows; flagged to Art in case he needs it deduped to one row per dealer."
+      "consequence": "Art has a standing cross-sell target list for CDJR dealers on Chat AI without Service AI. Report returns one row per order product, not per account, so a dealer with multiple rooftops shows multiple rows; flagged to Art in case he needs it deduped to one row per dealer.",
+      "category": "data-ops"
     },
     {
       "id": "proj-035",
@@ -348,7 +382,8 @@
       "records": null,
       "volume": "Bill requested the '[Dealer Group] MBR's by CS Rep' report regroup from Account Owner to Assigned To, with Luke asking that the linked dashboard match. Report-side grouping swap was straightforward; the harder part was locating the correct dashboard, since the obvious candidate ('[Dealer Group] Dashboard Merch') didn't contain the component and had to be found by tracing the broken 'field no longer available' component the report change caused.",
       "cause": "Dashboard components don't auto-refresh their field bindings when the underlying report's grouping changes, so re-pointing the report broke the linked component (Y-Axis still referencing the removed Account Owner field) until manually re-pointed to Assigned To.",
-      "consequence": "Report and dashboard now both reflect the Assigned To grouping Bill and Luke requested. General lesson: any report regrouping tied to a live dashboard needs the component checked and re-pointed manually, saving the report alone doesn't propagate the change."
+      "consequence": "Report and dashboard now both reflect the Assigned To grouping Bill and Luke requested. General lesson: any report regrouping tied to a live dashboard needs the component checked and re-pointed manually, saving the report alone doesn't propagate the change.",
+      "category": "data-ops"
     },
     {
       "id": "proj-036",
@@ -358,7 +393,8 @@
       "records": null,
       "volume": "Luke requested a rerun of the 6/24 dual-active report (accounts with active Service AI 1.0 AND 2.0 simultaneously) via cross filters on 'Accounts with Assets' (standard). During review, Luke surfaced a one-off billing edge case: one dealership, a Ford OEM-billed store, was upgraded to Service AI 2.0 with the dealer billed at the upgrade price while Ford continued being billed at the original gross price.",
       "cause": "No report filter can catch this kind of OEM-vs-dealer billing mismatch, since it requires comparing what Ford is invoiced against what the dealer is invoiced, data that doesn't sit in one filterable object. This is a pricing-logic question, not a data integrity gap.",
-      "consequence": "Dual-active cross filter rerun delivered to Luke per the standing report shape. Ford OEM billing case flagged and explicitly kicked to Luke as a billing-authority decision rather than something to build a report around, consistent with the detection-vs-remediation split."
+      "consequence": "Dual-active cross filter rerun delivered to Luke per the standing report shape. Ford OEM billing case flagged and explicitly kicked to Luke as a billing-authority decision rather than something to build a report around, consistent with the detection-vs-remediation split.",
+      "category": "data-ops"
     },
     {
       "id": "proj-037",
@@ -368,7 +404,8 @@
       "records": 945,
       "volume": "Dony asked whether Performance Managers were touching their accounts and which had gone untouched. Built two reports from scratch on 'Accounts with Activities' (custom): 'CS Touch - PM Activity Log (90 Days)' showing 945 PM touches across 64 PMs, and 'CS Touch - Accounts Not Touched (90 Days)' showing 83 PM-owned accounts with zero activity in the window. PM roster pulled from Setup > Users filtered by Role containing 'Performance Manager', reformatted from 'Last, First' to 'First Last' for the multi-value filter.",
       "cause": "No single field or report type tracks PM-specific account touches directly; required isolating the custom 'last_activity_date_pm__c' field and confirming Created Date, not the standard 'Date' field (non-functional as a filter here), was the correct date to filter on.",
-      "consequence": "Dony now has two standing reports answering 'who's touching what' and 'what's gone quiet' for the PM book. Splitting into two reports rather than one combined report kept the answer to Dony's two-part question clean instead of crowding both views into one."
+      "consequence": "Dony now has two standing reports answering 'who's touching what' and 'what's gone quiet' for the PM book. Splitting into two reports rather than one combined report kept the answer to Dony's two-part question clean instead of crowding both views into one.",
+      "category": "data-ops"
     },
     {
       "id": "proj-038",
@@ -378,7 +415,8 @@
       "records": 5,
       "volume": "Austin asked Alex to confirm dealer group signups for a Service AI xtime initiative against a list Jon had shared. Initial investigation chased Account-level integration fields (Xtime Integration Enabled checkbox, then Scheduling Provider picklist) before the real answer surfaced from cross-referencing Jon's actual MTD Bookings by rep export: 5 dealer group rooftops (five individual dealerships) signed Service AI last month, totaling ~$12,899 MRR, matching Jon's own 'we hit 13' recollection almost exactly.",
       "cause": "'Signed up' meant actual Opportunity Product line-item bookings (Product Name = Service AI 1.0/2.0, Ultimate Parent Account = the dealer group), not an Account-level integration status field. The right data source was a report Jon had already built and handed over, not something Object Manager digging could ever surface.",
-      "consequence": "Correct answer delivered and confirmed against Jon's own numbers. This MTD Bookings by rep report is now the source of truth for signup-style questions going forward, and Jon's ask doubles as validation for Austin's monthly initiative tracker idea. Next step: confirm with Benjy whether Gumloop's Salesforce read access covers Opportunity Product line items before scoping that as a build."
+      "consequence": "Correct answer delivered and confirmed against Jon's own numbers. This MTD Bookings by rep report is now the source of truth for signup-style questions going forward, and Jon's ask doubles as validation for Austin's monthly initiative tracker idea. Next step: confirm with Benjy whether Gumloop's Salesforce read access covers Opportunity Product line items before scoping that as a build.",
+      "category": "data-ops"
     },
     {
       "id": "proj-039",
@@ -388,7 +426,8 @@
       "records": 288,
       "volume": "Andy requested another rerun of the bundle conflict pipeline (following proj-015 and the 7/22 rerun in proj-023). Source export rebuilt fresh from 'Order Products - Custom' since no saved export persists between runs, now including the Onboarding Process Complete Date field Luke added since the last pass. Pipeline returned 70 conflicting orders across 288 rows. Added a bolded 'Pending Totals (Conflicting Orders Only)' summary row directly into the file at Andy's request, rather than just stating totals in chat: [INSERT pending MRR / pending NUP from the file].",
       "cause": "Same root cause as proj-015/proj-023: bundles only trigger assets and billing once every component Order Product hits Complete, and Salesforce can't natively isolate mixed-status groups within a bundle. No saved report or export persists between reruns, so every request means rebuilding the source pull from scratch.",
-      "consequence": "Andy has a current view of which bundles are still stuck behind partial completion and the pending MRR/NUP tied up in them, with totals now living in the deliverable itself instead of a chat message that gets lost. Delivered to Andy with a short Slack summary."
+      "consequence": "Andy has a current view of which bundles are still stuck behind partial completion and the pending MRR/NUP tied up in them, with totals now living in the deliverable itself instead of a chat message that gets lost. Delivered to Andy with a short Slack summary.",
+      "category": "data-ops"
     },
     {
       "id": "proj-040",
@@ -398,7 +437,8 @@
       "records": 3017,
       "volume": "Quarterly CDK-vs-Salesforce eLEAD reconciliation, matching ~3,735 CDK-listed dealers (list as of 7/6) against Salesforce rooftop accounts flagged Dealer CRM = eLEAD. Fuzzy name matching alone wasn't reliable enough; website domain cross-matching became the primary signal, and a late-stage cross-check against the full 'No' bucket surfaced 265 additional matches name-matching had missed. Collision audits (one CDK entry matching multiple SF accounts) caught further corrections. Final: 1,326 Yes (still eLEAD, no change), 1,689 No (dropped off CDK's list, eligible for SF update), 2 permanently unresolved (two individual dealerships). Delivered as Rooftop_Accounts_Ready.xlsx to Seth and Luke.",
       "cause": "No automated pipeline keeps Salesforce's eLEAD flag in sync with CDK's actual current list, so the two drift every quarter and require a full manual re-match. Name matching alone misses legal-name variants, punctuation differences, and rebrands (e.g. one rebranded dealership), which only website-domain cross-referencing catches.",
-      "consequence": "1,689 accounts are now confirmed eligible to be sold Sales AI without the eLEAD $1,000/month penalty, meaningfully more than pure name-matching would have found. Also surfaced two data hygiene issues outside the main reconciliation: a wrong website on one dealership (row 2696, should be the dealer's own domain) and three Salesforce duplicate records (three individual dealerships), flagged separately. Scoped afterward with Benjy as a candidate for a Gumloop automation build."
+      "consequence": "1,689 accounts are now confirmed eligible to be sold Sales AI without the eLEAD $1,000/month penalty, meaningfully more than pure name-matching would have found. Also surfaced two data hygiene issues outside the main reconciliation: a wrong website on one dealership (row 2696, should be the dealer's own domain) and three Salesforce duplicate records (three individual dealerships), flagged separately. Scoped afterward with Benjy as a candidate for a Gumloop automation build.",
+      "category": "data-ops"
     },
     {
       "id": "proj-041",
@@ -408,7 +448,8 @@
       "records": 44,
       "volume": "Built and shipped a Gumloop agent that reads the #kudos Slack channel (channel ID directly, bypassing name-based lookup which fails on the missing search:read.public scope) and appends Kudos Date, Sales Rep, Rooftop, and MRR to Lilly's live tracker sheet, running on a daily 9am trigger. Presented at a Thursday team demo, after which Lilly granted edit access to the live production sheet. Backfilled August 1 to 19 same day (44 rows, rows 226 to 269).",
       "cause": "Manual kudos logging into the tracker was inconsistent and depended on someone remembering to transcribe Slack posts by hand. Correct extraction also required a 'rep of record' rule to avoid crediting non-closing mentions, surfaced by a real case where a CEO was tagged in a kudos post but wasn't the closing rep.",
-      "consequence": "Kudos logging is now fully automated with no manual step, and runs off the confirmed live sheet rather than one of the stale copies that caused silent wrong-sheet writes during testing. Known open follow-up: Gumloop's Sheets Writer writes RAW values only, so MRR lands as text, not a number, requiring a manual VALUE() conversion until the write step is rebuilt or Gumloop ships a fix. Dropdown validation range and rep-name spelling mismatches (Thiel vs Theil, Zach vs Zack) also still need fixing."
+      "consequence": "Kudos logging is now fully automated with no manual step, and runs off the confirmed live sheet rather than one of the stale copies that caused silent wrong-sheet writes during testing. Known open follow-up: Gumloop's Sheets Writer writes RAW values only, so MRR lands as text, not a number, requiring a manual VALUE() conversion until the write step is rebuilt or Gumloop ships a fix. Dropdown validation range and rep-name spelling mismatches (Thiel vs Theil, Zach vs Zack) also still need fixing.",
+      "category": "automation"
     },
     {
       "id": "proj-042",
@@ -418,17 +459,30 @@
       "records": 55,
       "volume": "Full audit of all 55 saved Salesforce reports, cross-referencing each against past project history to confirm whether its name still reflected its actual filter logic and purpose. Renamed reports where the name was stale or generic (e.g. 'Report 7-10' to 'Order Products - Complete, No Asset', the ambiguous 'New Order Products - Custom Report' to 'Order Products - Salman Onboarding No-Asset Check'), and flagged three reports (Bookings Fill-in, Finding Product ID Name, Active Sales AI Assets - Term Review) that couldn't be verified from history for manual review.",
       "cause": "Report names had drifted from their actual purpose over months of ad hoc builds and reruns, leaving generic placeholder names, duplicate near-identical reports, and at least one actively subscribed weekly report ('Sales AI and Lead Nurture Validation') whose filter logic used OR instead of AND, making its name misleading about what it actually returns.",
-      "consequence": "The report library now reflects what each report actually does, cutting the risk of picking the wrong saved report for a task, which had already caused at least one rework incident (the 'New Order Products' mixup on the Bundle Status Conflicts workstream). The OR-logic issue on the subscribed weekly report is a live accuracy risk worth flagging separately to whoever relies on it."
+      "consequence": "The report library now reflects what each report actually does, cutting the risk of picking the wrong saved report for a task, which had already caused at least one rework incident (the 'New Order Products' mixup on the Bundle Status Conflicts workstream). The OR-logic issue on the subscribed weekly report is a live accuracy risk worth flagging separately to whoever relies on it.",
+      "category": "data-ops"
     },
     {
-    "id": "proj-043",
-    "name": "Specialty Account Type Mismatch Reconciliation — Harley-Davidson Cohort",
-    "status": "complete",
-    "date": "8/31/26",
-    "records": 5,
-    "volume": "Luke requested a scrub of a 1,378-row Specialty Accounts report to find and correct any accounts still tagged with the wrong Type. Initial pass found none of the 1,378 rows (1,376 unique accounts) carried Type = Specialty, an all-rows mismatch rather than a handful of strays. Rather than bulk-updating the full set, pulled a live org-wide export of 4,274 confirmed Type = Specialty accounts to derive real naming and OEM-field patterns (Powersports/Motorcycle, Marine, RV/Camping, Heavy Equipment, Commercial/Fleet), then applied those patterns to the 1,376-account list. Only 5 accounts matched: four Harley-Davidson dealers on name and OEM field (four individual dealerships) and one dual-line dealer (one dealership) caught only via the Related OEM field. Updated all 5 to Type = Specialty via direct record edit after Luke's sign-off.",
-    "cause": "A 100% mismatch rate across the full report was a signal the Type field itself carried other meaning, not proof the whole population needed correcting. Luke confirmed on review that most of the 1,376 rows were mainstream franchise dealers correctly excluded from Specialty, and that the real gap was a small number of genuine specialty dealers (starting with Harley-Davidson stores) that had never been tagged. Pattern-matching against a real ground-truth export of existing Specialty accounts, rather than a guessed keyword list, avoided both a mass mistag and a manual line-by-line review of 1,376 accounts.",
-    "consequence": "Closed a live Type miscategorization on 5 genuine specialty dealers without touching the 1,371 correctly-typed accounts sitting in the same report. Delivered a defensible, high-confidence shortlist instead of a blanket update, which is what got fast sign-off from Luke rather than a request to slow down and sample. Reusable takeaway: when a scrub request returns a 100% hit rate, get ground truth before touching data, not after."
+      "id": "proj-043",
+      "name": "Specialty Account Type Mismatch Reconciliation — Harley-Davidson Cohort",
+      "status": "complete",
+      "date": "8/31/26",
+      "records": 5,
+      "volume": "Luke requested a scrub of a 1,378-row Specialty Accounts report to find and correct any accounts still tagged with the wrong Type. Initial pass found none of the 1,378 rows (1,376 unique accounts) carried Type = Specialty, an all-rows mismatch rather than a handful of strays. Rather than bulk-updating the full set, pulled a live org-wide export of 4,274 confirmed Type = Specialty accounts to derive real naming and OEM-field patterns (Powersports/Motorcycle, Marine, RV/Camping, Heavy Equipment, Commercial/Fleet), then applied those patterns to the 1,376-account list. Only 5 accounts matched: four Harley-Davidson dealers on name and OEM field (four individual dealerships) and one dual-line dealer (one dealership) caught only via the Related OEM field. Updated all 5 to Type = Specialty via direct record edit after Luke's sign-off.",
+      "cause": "A 100% mismatch rate across the full report was a signal the Type field itself carried other meaning, not proof the whole population needed correcting. Luke confirmed on review that most of the 1,376 rows were mainstream franchise dealers correctly excluded from Specialty, and that the real gap was a small number of genuine specialty dealers (starting with Harley-Davidson stores) that had never been tagged. Pattern-matching against a real ground-truth export of existing Specialty accounts, rather than a guessed keyword list, avoided both a mass mistag and a manual line-by-line review of 1,376 accounts.",
+      "consequence": "Closed a live Type miscategorization on 5 genuine specialty dealers without touching the 1,371 correctly-typed accounts sitting in the same report. Delivered a defensible, high-confidence shortlist instead of a blanket update, which is what got fast sign-off from Luke rather than a request to slow down and sample. Reusable takeaway: when a scrub request returns a 100% hit rate, get ground truth before touching data, not after.",
+      "category": "data-ops"
+    },
+    {
+      "id": "proj-044",
+      "name": "Retention Case Loader: Gumloop Agent for Salesforce Retention Cases",
+      "status": "in progress",
+      "date": "11/6/26",
+      "records": 1,
+      "volume": "Built a Gumloop agent that turns approved rows in the Cancel Notification Tracker into Salesforce Customer Retention Cases. Each row runs six steps: validate, create Case, create Case Asset, set cancellation date, set status to Pending Approval, and write the Case Number link back to the sheet. Separate UAT and production agents share one skill, with code changes made and tested in UAT first. First production write (row 532, Infiniti of Akron) created Case 00307234 with all six steps clean. Added live reason validation against the connected Salesforce org (37 of 44 reason pairs valid in prod; invalid pairs fail closed to manual review) and a production batch mode that processes every approved row in one run, capped at 10, with 683 passing tests.",
+      "cause": "Retention Cases were created by hand from the tracker, one row and several Salesforce records at a time. That is slow, easy to get wrong, and scales badly when one dealer cancels many products at once. Automating it safely needed hard guardrails: a write lock file, an org allow-list, one-Case-per-Asset duplicate protection, re-checking approval and the Case Number column right before each write, and human approval on every write until go-live.",
+      "consequence": "Removes manual Case entry for Sales Ops once live, while keeping a human approval gate in the sheet. The guardrail design means a bad row stops itself instead of creating bad data. Also designed the failure handoff so the process does not depend on me: Gumloop posts a run summary to a private Slack channel, and Claude in Slack explains failures from channel instructions, so anyone can triage without touching code. Remaining before go-live: a multi-row prod batch test, the Slack summary, moving the Sheets connector to a shared account, and the schedule.",
+      "category": "automation"
     }
   ],
   "deliverables": [
@@ -438,7 +492,8 @@
       "date": "June 2026",
       "audience": "Luke, for leadership (Devin/Wayne/Andy if it comes up)",
       "summary": "Purchase dates for ~10,000 legacy Outsell-migrated assets cannot be recovered at scale. The Renewal Opportunity link is the only thing that survives the migration on most records, and there is no remaining path back to the original purchase date. Manual tracing works per-account but costs ~25 clicks across 4 records for an estimate, not a confirmed date — not worth it across the full population.",
-      "context": "Built from Stephen's walkthrough in the 6/23 Sales Ops standup, after Luke asked the team to document findings and prepare to present them up the chain rather than keep digging. Delivered as a one-page BLUF memo (Word doc) so leadership can skim the conclusion and stop, or read the supporting detail if they want it. In other words: I wrote a memo that the C suite will possibly see.... that's pretty cool."
+      "context": "Built from Stephen's walkthrough in the 6/23 Sales Ops standup, after Luke asked the team to document findings and prepare to present them up the chain rather than keep digging. Delivered as a one-page BLUF memo (Word doc) so leadership can skim the conclusion and stop, or read the supporting detail if they want it. In other words: I wrote a memo that the C suite will possibly see.... that's pretty cool.",
+      "category": "misc"
     }
   ]
 }

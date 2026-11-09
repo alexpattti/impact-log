@@ -118,7 +118,7 @@
       "records": 23,
       "volume": "209 pending AIVA order products reviewed (Onboarding Status = Pending) via custom Order Products report; none fell below the price threshold; 23 records identified with a consistent gap between Net Unit Price and MRR matching the old and new AIVA rates",
       "cause": "Traced one flagged record (one dealership) to its full Order Product detail. MRR calculated off List/Unit Price (gross, pre-discount), while Net Unit Price correctly reflected the post-discount amount. No 'Net MRR' field exists on the Order Product object, so any discounted AIVA deal showed this same gap by design, not as a data entry error.",
-      "consequence": "Any reporting or forecasting built on MRR was using gross revenue, not actual net recurring revenue, on discounted accounts. Confirmed with my manager; both Net Unit Price and MRR set to 1,000 to match the existing correct value across all 23 records, staged with Order Product IDs and handed off for Data Loader upload.",
+      "consequence": "Any reporting or forecasting built on MRR was using gross revenue, not actual net recurring revenue, on discounted accounts. Confirmed with my manager; both Net Unit Price and MRR set to the correct renegotiated rate across all 23 records, staged with Order Product IDs and handed off for Data Loader upload.",
       "category": "data-ops"
     },
     {
